@@ -23,9 +23,14 @@
     // The GitHub Pages preview calls this Worker cross-origin.
     "ALLOWED_ORIGINS": "https://zagware.github.io,http://localhost:4173"
   },
-  // Orders + contact messages. Create once with:
-  //   npx wrangler d1 create zagware-devtest
-  // then add:
-  //   "d1_databases": [{ "binding": "DB", "database_name": "zagware-devtest", "database_id": "<id>", "migrations_dir": "../../worker/migrations" }]
+  // Orders + contact messages. Migrations: npx wrangler d1 migrations apply DB --remote
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "zagware-devtest",
+      "database_id": "a081a91c-56b7-4d8f-90bb-d41dcc957d8f",
+      "migrations_dir": "../../worker/migrations"
+    }
+  ],
   "observability": { "enabled": true, "head_sampling_rate": 0.1 }
 }

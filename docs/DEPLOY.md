@@ -43,14 +43,32 @@ The **Preview (GitHub Pages)** workflow publishes on every push to `main`. Send 
 3. **Secrets in the site repo** (Settings → Secrets → Actions):
    - `CLOUDFLARE_API_TOKEN`: a token scoped to *Workers Scripts:Edit*, *Workers Routes:Edit*, *D1:Edit*, and *Zone:Read* on that zone.
    - `CLOUDFLARE_ACCOUNT_ID`
-4. **Shops only**:
-   - `npx wrangler d1 create <slug>-orders`, then paste the id into `wrangler.jsonc`.
-   - `npx wrangler secret put STRIPE_SECRET_KEY`
-   - `npx wrangler secret put STRIPE_WEBHOOK_SECRET`
-   - Add a Stripe webhook endpoint `https://<domain>/api/stripe/webhook` for `checkout.session.completed`.
+4. **Sites with a Worker (contact form and/or shop)**:
+   - `npx wrangler d1 create <slug>-site`, paste the id into `wrangler.jsonc`, then `npx wrangler d1 migrations apply DB --remote`.
+   - Shops: `npx wrangler secret put STRIPE_SECRET_KEY` (restricted key), then add a Stripe webhook endpoint `https://<domain>/api/stripe/webhook` for `checkout.session.completed`, `checkout.session.async_payment_succeeded` and `checkout.session.async_payment_failed`, and `npx wrangler secret put STRIPE_WEBHOOK_SECRET` with its signing secret.
+   - Contact messages are stored in D1 without further setup. To have them emailed as well, see [Contact form email](#contact-form-email).
 5. **Deploy**: tag `v1.0.0` (or run the **Deploy (Cloudflare)** workflow by hand). The workflow builds with `--strict`, applies D1 migrations, deploys, and smoke-tests `/`, `/robots.txt` and `/api/health`.
 6. **www → apex (or the reverse)**: dashboard → Rules → Redirect Rules → "Redirect from WWW to root" template.
 7. **Pages preview**: turn off the Pages site (Settings → Pages → Unpublish), or keep it for staging changes. It stays `noindex` either way.
+
+### Contact form email
+
+The Worker emails messages through Cloudflare **Email Routing** (`send_email` binding). Destinations must be addresses verified in Email Routing.
+
+> ⚠️ Enabling Email Routing on a domain **replaces its MX records**. `zagware.io` receives mail at Proton (`mail.protonmail.ch`), so **never** enable it on the apex. Enable it on a subdomain only, which leaves apex mail untouched. Apply the same rule to any customer domain whose mailbox is hosted elsewhere.
+
+One-time setup in the dashboard (the API token needs *Email Routing Addresses:Edit* and *Zone Email Routing Rules/Settings:Edit* to script it):
+
+1. Account → **Email** → Email Routing → **Destination addresses** → add the inbox that should receive messages. Click the link in the verification email.
+2. Zone (e.g. `zagware.io`) → Email → Email Routing → **Settings → Subdomains** → add a subdomain, e.g. `devtest`. Accept the MX/SPF records it adds for that subdomain only.
+3. In the site's `wrangler.jsonc`:
+   ```jsonc
+   "send_email": [{ "name": "CONTACT_EMAIL", "destination_address": "you@example.com" }],
+   "vars": { "CONTACT_TO": "you@example.com", "CONTACT_FROM": "website@devtest.zagware.io" }
+   ```
+4. Deploy. `/api/health` reports `"contact": true`. Messages are stored in D1 and emailed with `Reply-To` set to the sender's address.
+
+To read stored messages: `npx wrangler d1 execute DB --remote --command "select created_at, fields_json from messages order by id desc limit 20"`.
 
 ### Local deploys without GitHub
 
