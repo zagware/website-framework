@@ -7,7 +7,7 @@ This framework builds static-first customer websites from one config file. Each 
 - an optional **Stripe** shop and contact form, served by a small site Worker
 
 ```
-bin/zsite.mjs        CLI: build · dev · check · new · components
+bin/zsite.mjs        CLI: build · dev · check · new · smoke · components
 src/                 engine (zero runtime deps; sharp optional for WebP)
   components/        section types (+ CSS)     → docs/COMPONENTS.md
   client/            browser scripts, bundled only when used

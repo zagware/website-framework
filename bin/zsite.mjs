@@ -4,6 +4,7 @@
 //   zsite dev <site> [--port 4173]
 //   zsite check <site>            build every configured target to a temp dir; fail on errors/broken links
 //   zsite new <dir> --name "Customer Ltd" [--worker] [--commerce] [--repo owner/name] [--domain example.com]
+//   zsite smoke <url> [--api]     post-deploy check (home, robots, 404, /api/health)
 //   zsite components              list section types
 
 import { mkdtemp, rm } from "node:fs/promises";
@@ -14,6 +15,7 @@ import { build, BuildError } from "../src/build.mjs";
 import { loadComponents } from "../src/components.mjs";
 import { dev } from "../src/dev-server.mjs";
 import { scaffold } from "../src/scaffold.mjs";
+import { smoke } from "../src/smoke.mjs";
 
 const { values: opts, positionals } = parseArgs({
   allowPositionals: true,
@@ -28,6 +30,7 @@ const { values: opts, positionals } = parseArgs({
     worker: { type: "boolean", default: false },
     repo: { type: "string" },
     domain: { type: "string" },
+    api: { type: "boolean", default: false },
     help: { type: "boolean", short: "h" },
   },
 });
@@ -38,6 +41,7 @@ const USAGE = `zsite <command>
   dev <site> [--port 4173]
   check <site>
   new <dir> --name "Customer" [--worker] [--commerce] [--repo owner/name] [--domain example.com]
+  smoke <url> [--api]
   components`;
 
 function report(result) {
@@ -83,6 +87,12 @@ async function main() {
     case "new":
       if (!arg || !opts.name) throw new Error('new needs a directory and --name "Customer"');
       return scaffold(arg, { name: opts.name, commerce: opts.commerce, worker: opts.worker, repo: opts.repo, domain: opts.domain });
+    case "smoke": {
+      if (!arg) throw new Error("smoke needs the deployed site URL");
+      const { failed } = await smoke(arg, { api: opts.api });
+      if (failed) process.exitCode = 1;
+      return;
+    }
     case "components": {
       const registry = await loadComponents(arg);
       for (const [type, c] of [...registry].sort()) console.log(`${type.padEnd(16)} ${c.summary ?? ""}`);

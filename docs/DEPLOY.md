@@ -47,7 +47,7 @@ The **Preview (GitHub Pages)** workflow publishes on every push to `main`. Send 
    - `npx wrangler d1 create <slug>-site`, paste the id into `wrangler.jsonc`, then `npx wrangler d1 migrations apply DB --remote`.
    - Shops: `npx wrangler secret put STRIPE_SECRET_KEY` (restricted key), then add a Stripe webhook endpoint `https://<domain>/api/stripe/webhook` for `checkout.session.completed`, `checkout.session.async_payment_succeeded` and `checkout.session.async_payment_failed`, and `npx wrangler secret put STRIPE_WEBHOOK_SECRET` with its signing secret.
    - Contact messages are stored in D1 without further setup. To have them emailed as well, see [Contact form email](#contact-form-email).
-5. **Deploy**: tag `v1.0.0` (or run the **Deploy (Cloudflare)** workflow by hand). The workflow builds with `--strict`, applies D1 migrations, deploys, and smoke-tests `/`, `/robots.txt` and `/api/health`.
+5. **Deploy**: tag `v1.0.0` (or run the **Deploy (Cloudflare)** workflow by hand). The workflow builds with `--strict`, applies D1 migrations, deploys, and runs `zsite smoke` (`/`, `/robots.txt`, the 404 page, `/api/health`). A Cloudflare bot challenge seen from the GitHub runner (Bot Fight Mode) is reported, not failed; every other error fails the deploy.
 6. **www → apex (or the reverse)**: dashboard → Rules → Redirect Rules → "Redirect from WWW to root" template.
 7. **Pages preview**: turn off the Pages site (Settings → Pages → Unpublish), or keep it for staging changes. It stays `noindex` either way.
 
