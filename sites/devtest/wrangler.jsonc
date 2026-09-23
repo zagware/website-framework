@@ -1,0 +1,31 @@
+{
+  // devtest on Cloudflare: static assets + the framework's site Worker
+  // (/api/checkout, /api/stripe/webhook, /api/contact) in Stripe TEST mode.
+  //
+  //   node ../../bin/zsite.mjs build . --target cloudflare
+  //   npx wrangler deploy
+  //
+  // Secrets (never in this file): wrangler secret put STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "zagware-devtest",
+  "main": "../../worker/index.mjs",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "routes": [{ "pattern": "devtest.zagware.io", "custom_domain": true }],
+  "vars": {
+    "SITE_URL": "https://devtest.zagware.io",
+    // The GitHub Pages preview calls this Worker cross-origin.
+    "ALLOWED_ORIGINS": "https://zagware.github.io,http://localhost:4173"
+  },
+  // Orders + contact messages. Create once with:
+  //   npx wrangler d1 create zagware-devtest
+  // then add:
+  //   "d1_databases": [{ "binding": "DB", "database_name": "zagware-devtest", "database_id": "<id>", "migrations_dir": "../../worker/migrations" }]
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 }
+}

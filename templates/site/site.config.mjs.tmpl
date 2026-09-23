@@ -1,0 +1,57 @@
+// {{NAME}} — site content and settings.
+// Section types: run `npx zsite components`, or browse the devtest catalogue
+// at https://zagware.github.io/website-framework/components/
+export default {
+  name: "{{NAME}}",
+  description: "One or two sentences for search results and link previews.",
+  lang: "en-GB",
+  urls: {
+    production: "{{PRODUCTION_URL}}",
+    pages: "{{PAGES_URL}}",
+  },
+  logo: { src: "img/logo.svg", width: 40, height: 40 },
+  theme: { preset: "classic", tokens: {} },
+  nav: [
+    { label: "About", href: "/#about" },
+    { label: "FAQ", href: "/#faq" },
+  ],
+  navCta: { label: "Contact", href: "/#contact" },
+  socials: [],
+  footer: { text: "" },
+  seo: {},
+
+  pages: [
+    {
+      path: "/",
+      title: "{{NAME}}",
+      sections: [
+        {
+          type: "hero",
+          title: "{{NAME}}",
+          lede: "Replace this with the customer's one-line promise.",
+          actions: [{ label: "Get in touch", href: "/#contact", style: "accent" }],
+        },
+        {
+          type: "split",
+          id: "about",
+          eyebrow: "About",
+          heading: "Who we are",
+          paragraphs: ["Tell the story here."],
+        },
+        {
+          type: "faq",
+          id: "faq",
+          tone: "alt",
+          heading: "Frequently asked questions",
+          items: [{ q: "A common question?", a: "A clear answer." }],
+        },
+        {
+          type: "contact",
+          id: "contact",
+          heading: "Contact",
+          methods: [{ kind: "email", label: "hello@example.com", href: "mailto:hello@example.com" }],
+        },
+      ],
+    },
+  ],
+};

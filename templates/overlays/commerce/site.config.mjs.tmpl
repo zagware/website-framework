@@ -1,0 +1,105 @@
+// {{NAME}} — site content and settings (shop).
+// Section types: run `npx zsite components`, or browse the devtest catalogue
+// at https://zagware.github.io/website-framework/components/
+export default {
+  name: "{{NAME}}",
+  description: "One or two sentences for search results and link previews.",
+  lang: "en-GB",
+  urls: {
+    production: "{{PRODUCTION_URL}}",
+    pages: "{{PAGES_URL}}",
+  },
+  logo: { src: "img/logo.svg", width: 40, height: 40 },
+  theme: { preset: "classic", tokens: {} },
+  nav: [
+    { label: "Shop", href: "/shop/" },
+    { label: "About", href: "/#about" },
+    { label: "FAQ", href: "/#faq" },
+  ],
+  navCta: { label: "Contact", href: "/#contact" },
+  socials: [],
+  footer: { text: "" },
+  seo: {},
+
+  // Site Worker. "" = same origin on Cloudflare. GitHub Pages previews cannot
+  // run the Worker: point them at the deployed one (Stripe TEST keys) once it exists.
+  api: { base: "" },
+  targets: {
+    // pages: { api: { base: "https://{{DOMAIN}}" } },
+  },
+
+  commerce: {
+    provider: "stripe-lite",
+    currency: "GBP",
+    mode: "test", // switch to "live" with live Stripe keys at launch
+    cartPath: "/shop/basket/",
+    successPath: "/shop/thanks/",
+    cancelPath: "/shop/basket/",
+    shipping: {
+      countries: ["GB", "IE"],
+      rates: [{ id: "standard", label: "Standard delivery", amount: 395, freeOver: 5000 }],
+    },
+    products: [
+      {
+        id: "example-product",
+        name: "Example product",
+        description: "Short description shown on the product card.",
+        price: 1500, // pence
+        image: "img/logo.svg",
+        shippable: true,
+      },
+    ],
+  },
+
+  pages: [
+    {
+      path: "/",
+      title: "{{NAME}}",
+      sections: [
+        {
+          type: "hero",
+          title: "{{NAME}}",
+          lede: "Replace this with the customer's one-line promise.",
+          actions: [{ label: "Shop now", href: "/shop/", style: "accent" }],
+        },
+        { type: "products", tone: "alt", heading: "Featured" },
+        {
+          type: "split",
+          id: "about",
+          eyebrow: "About",
+          heading: "Who we are",
+          paragraphs: ["Tell the story here."],
+        },
+        {
+          type: "faq",
+          id: "faq",
+          tone: "alt",
+          heading: "Frequently asked questions",
+          items: [{ q: "How long does delivery take?", a: "Usually 3–5 working days." }],
+        },
+        {
+          type: "contact",
+          id: "contact",
+          heading: "Contact",
+          methods: [{ kind: "email", label: "hello@example.com", href: "mailto:hello@example.com" }],
+          form: {
+            action: "worker",
+            fields: [
+              { name: "name", label: "Name", type: "text", required: true },
+              { name: "email", label: "Email", type: "email", required: true },
+              { name: "message", label: "Message", type: "textarea", required: true },
+            ],
+          },
+        },
+      ],
+    },
+    { path: "/shop/", title: "Shop", sections: [{ type: "products", heading: "Shop" }] },
+    { path: "/shop/basket/", title: "Basket", noindex: true, sections: [{ type: "cart", heading: "Your basket", continueHref: "/shop/" }] },
+    {
+      path: "/shop/thanks/",
+      title: "Order confirmed",
+      noindex: true,
+      sections: [{ type: "checkout-status", status: "success", heading: "Thank you!", body: "We've emailed your receipt and will let you know when it ships." }],
+    },
+  ],
+};

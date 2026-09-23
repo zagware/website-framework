@@ -1,0 +1,36 @@
+# {{NAME}} website
+
+Built with the [Zagware website framework](https://github.com/{{FRAMEWORK_REPO}}). All content lives in `site.config.mjs`; images go in `assets/img/`.
+
+| | URL |
+|---|---|
+| Preview (GitHub Pages, noindex) | {{PAGES_URL}} |
+| Production (Cloudflare) | {{PRODUCTION_URL}} |
+
+## Develop
+
+```bash
+npm install
+npx zsite dev .          # http://localhost:4173, live reload
+npx zsite components     # list available section types
+npx zsite check .        # build every target; fails on warnings or broken links
+```
+
+## Preview (POC)
+
+Pushing to `main` runs **Preview (GitHub Pages)**. One-time setup: repo Settings → Pages → Source: **GitHub Actions**.
+
+## Go live on Cloudflare
+
+1. Put the domain's zone on the Zagware Cloudflare account. Copy the mail records (MX/SPF/DKIM/DMARC) before switching nameservers.
+2. In `wrangler.jsonc`, uncomment `routes`. If the site has a Worker (`worker.mjs`), also run `npx wrangler d1 create {{SLUG}}-site`, paste the id into `wrangler.jsonc`, and add the secrets listed at the top of that file.
+3. Add the repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+4. `git tag v1.0.0 && git push --tags`. This runs **Deploy (Cloudflare)**: build, D1 migrations, deploy, smoke test.
+
+## Framework updates
+
+```bash
+npm install github:zagware/website-framework#vX.Y.Z && npx zsite check .
+```
+
+Only upgrade to versions that have been verified on the devtest site.

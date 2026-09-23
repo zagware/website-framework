@@ -1,0 +1,72 @@
+.s-cart:focus { outline: none; }
+.s-cart__layout { display: grid; gap: 2rem; align-items: start; }
+@media (min-width: 900px) {
+  .s-cart__layout { grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem); }
+  .s-cart__summary { position: sticky; top: calc(var(--nav-h) + 1rem); }
+}
+
+.s-cart__notice { margin: 0 0 1rem; padding: 0.75rem 1rem; border-radius: var(--radius); background: var(--c-surface-2); color: var(--c-text); }
+
+.s-cart__lines { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--c-border); }
+.s-cart__line {
+  display: grid; gap: 0.6rem 1rem; align-items: center; padding-block: 1.1rem;
+  border-bottom: 1px solid var(--c-border);
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  grid-template-areas: "thumb info total" "thumb qty remove";
+}
+@media (min-width: 640px) {
+  .s-cart__line { grid-template-columns: 5.5rem minmax(0, 1fr) auto 6rem auto; grid-template-areas: "thumb info qty total remove"; }
+}
+.s-cart__thumb { grid-area: thumb; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); background: var(--c-surface-2); }
+.s-cart__info { grid-area: info; min-width: 0; }
+.s-cart__info p { margin: 0; }
+.s-cart__name { font-weight: 650; }
+.s-cart__opts, .s-cart__unit { font-size: 0.9rem; color: var(--c-muted); }
+.band--dark .s-cart__opts, .band--dark .s-cart__unit { color: var(--c-dark-muted); }
+
+.s-cart__qty { grid-area: qty; display: inline-flex; align-items: center; width: max-content; border: 1px solid var(--c-border); border-radius: 999px; }
+.s-cart__step {
+  width: 2.75rem; height: 2.75rem; display: grid; place-items: center;
+  border: 0; border-radius: 999px; background: transparent; color: inherit; font: inherit; font-size: 1.25rem; cursor: pointer;
+}
+.s-cart__step:hover:not(:disabled) { background: var(--c-surface-2); }
+.s-cart__step:disabled { opacity: 0.4; cursor: not-allowed; }
+.s-cart__qty input {
+  width: 3rem; height: 2.75rem; border: 0; background: transparent; color: inherit;
+  font: inherit; font-weight: 650; text-align: center; -moz-appearance: textfield; appearance: textfield;
+}
+.s-cart__qty input::-webkit-outer-spin-button, .s-cart__qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.s-cart__total { grid-area: total; margin: 0; font-weight: 700; text-align: right; }
+.s-cart__remove { grid-area: remove; justify-self: end; font-size: 0.9rem; text-decoration: underline; text-underline-offset: 0.18em; }
+
+.s-cart__summary h3 { margin-bottom: 1rem; }
+.s-cart__rates { border: 0; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.5rem; }
+.s-cart__rates legend { font-weight: 650; margin-bottom: 0.5rem; padding: 0; }
+.s-cart__rate {
+  display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.6rem 0.8rem; cursor: pointer;
+  border: 1px solid var(--c-border); border-radius: var(--radius);
+}
+.s-cart__rate:has(input:checked) { border-color: var(--c-primary); box-shadow: inset 0 0 0 1px var(--c-primary); }
+.s-cart__rate input { margin-top: 0.3em; accent-color: var(--c-primary); }
+.s-cart__rate span { flex: 1; }
+.s-cart__rate strong { white-space: nowrap; }
+
+.s-cart__totals { margin: 0 0 1rem; }
+.s-cart__totals > div { display: flex; justify-content: space-between; gap: 1rem; padding-block: 0.3rem; }
+.s-cart__totals dt { color: var(--c-muted); }
+.s-cart__totals dd { margin: 0; font-weight: 650; text-align: right; }
+.s-cart__totals > .s-cart__grand { border-top: 1px solid var(--c-border); margin-top: 0.4rem; padding-top: 0.7rem; font-size: 1.15rem; }
+.s-cart__grand dt { color: var(--c-text); font-weight: 700; }
+.s-cart__grand dd { font-weight: 800; }
+
+.s-cart__hint, .s-cart__countries { font-size: 0.9rem; color: var(--c-muted); margin: 0 0 0.75rem; }
+.s-cart__checkout { width: 100%; margin-top: 0.25rem; }
+.s-cart__error { margin: 0.75rem 0 0; font-weight: 600; }
+.s-cart__error:not(:empty) { padding: 0.6rem 0.8rem; border-left: 4px solid var(--c-accent); background: var(--c-surface); border-radius: var(--radius); }
+.s-cart__test {
+  margin: 1rem 0 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--c-accent) 14%, transparent);
+}
+.s-cart__continue { margin: 1rem 0 0; font-size: 0.95rem; }
+.s-cart__empty p { margin-bottom: 1.25rem; }
+.s-cart__note { margin-top: 1.5rem; font-size: 0.95rem; }

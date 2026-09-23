@@ -1,0 +1,29 @@
+.s-hero { padding: 0; }
+.hero { position: relative; display: flex; align-items: center; overflow: hidden; isolation: isolate; }
+.hero--full { min-height: calc(100svh - var(--nav-h)); }
+.hero--large { min-height: min(78svh, 760px); }
+.hero--medium { min-height: 420px; }
+.hero--compact { min-height: 0; }
+.hero__inner { position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; padding-block: clamp(3rem, 9vw, 7rem); }
+.hero__content { max-width: 44rem; }
+.hero--center .hero__inner { justify-content: center; text-align: center; }
+.hero--center .btn-row { justify-content: center; }
+.hero h1 em { font-style: normal; color: var(--c-accent); }
+.hero__lede { font-size: clamp(1.1rem, 2vw, 1.3rem); max-width: 38rem; opacity: 0.92; }
+.hero--center .hero__lede { margin-inline: auto; }
+.hero__badge { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--c-accent); color: var(--c-accent-contrast); font-weight: 700; padding: 0.4rem 0.9rem; border-radius: var(--radius); margin-bottom: 1.2rem; }
+.hero__bg { position: absolute; inset: 0; z-index: 0; }
+.hero__bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, rgb(0 0 0 / var(--overlay)) 0%, rgb(0 0 0 / calc(var(--overlay) * 0.55)) 100%); }
+.hero__img, .hero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero--media { color: #fff; }
+.hero--media .eyebrow { color: #fff; opacity: 0.9; }
+.hero--media .btn--outline { color: #fff; }
+.hero:not(.hero--media) { background: var(--c-surface); }
+.hero__aside { margin: 0; background: #fff; color: var(--c-text); padding: 0.75rem; border-radius: var(--radius-lg); box-shadow: var(--shadow); width: 170px; flex: none; text-align: center; font-size: 0.85rem; font-weight: 600; }
+.hero__aside img { width: 100%; height: auto; border-radius: var(--radius); aspect-ratio: 1; object-fit: cover; }
+.hero__aside figcaption { margin-top: 0.5rem; }
+@media (max-width: 760px) {
+  .hero__inner { flex-direction: column; align-items: flex-start; }
+  .hero__aside { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .hero__video { display: none; } }

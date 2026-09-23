@@ -1,0 +1,44 @@
+{
+  // Static assets + the framework site Worker (/api/contact, /api/checkout,
+  // /api/stripe/webhook). Deploy: npm run deploy (or the Cloudflare workflow).
+  //
+  // One-time setup:
+  //   npx wrangler d1 create {{SLUG}}-site         → paste the id below
+  //   npx wrangler d1 migrations apply DB --remote
+  //   Shops:   npx wrangler secret put STRIPE_SECRET_KEY      (restricted rk_ key)
+  //            npx wrangler secret put STRIPE_WEBHOOK_SECRET
+  //   Spam:    npx wrangler secret put TURNSTILE_SECRET       (optional)
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "{{WORKER_NAME}}",
+  "main": "worker.mjs",
+  "compatibility_date": "{{COMPAT_DATE}}",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  // Uncomment once the domain's zone is on this Cloudflare account.
+  // "routes": [
+  //   { "pattern": "{{DOMAIN}}", "custom_domain": true },
+  //   { "pattern": "www.{{DOMAIN}}", "custom_domain": true }
+  // ],
+  "vars": {
+    "SITE_URL": "{{PRODUCTION_URL}}",
+    // Origins allowed to call /api cross-origin (the GitHub Pages preview).
+    "ALLOWED_ORIGINS": "https://zagware.github.io"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "{{SLUG}}-site",
+      "database_id": "REPLACE_WITH_ID_FROM_wrangler_d1_create",
+      "migrations_dir": "node_modules/@zagware/site-framework/worker/migrations"
+    }
+  ],
+  // Optional: email contact messages via Cloudflare Email Routing.
+  // "send_email": [{ "name": "CONTACT_EMAIL", "destination_address": "owner@example.com" }],
+  // plus vars CONTACT_TO (same address) and CONTACT_FROM (e.g. website@{{DOMAIN}}).
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 }
+}

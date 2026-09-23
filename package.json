@@ -1,0 +1,39 @@
+{
+  "name": "@zagware/site-framework",
+  "version": "0.1.0",
+  "description": "Zagware static-first website framework: config-driven sites, GitHub Pages previews, Cloudflare production, optional Stripe commerce.",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "bin": {
+    "zsite": "bin/zsite.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./worker": "./worker/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "src",
+    "worker",
+    "templates"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "dev": "node bin/zsite.mjs dev sites/devtest",
+    "build": "node bin/zsite.mjs build sites/devtest --target local",
+    "build:pages": "node bin/zsite.mjs build sites/devtest --target pages",
+    "build:cloudflare": "node bin/zsite.mjs build sites/devtest --target cloudflare",
+    "check": "node bin/zsite.mjs check sites/devtest"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.34.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.36.0"
+  }
+}

@@ -1,0 +1,13 @@
+.s-cards__item { display: flex; flex-direction: column; gap: 0.25rem; position: relative; overflow: hidden; }
+.s-cards__item > :last-child { margin-bottom: 0; }
+.s-cards__item p { margin-bottom: 0.6rem; }
+.s-cards__item--plain { padding: 0.5rem 0; }
+.s-cards__media { margin: -1.5rem -1.5rem 1rem; aspect-ratio: 16 / 10; overflow: hidden; background: var(--c-surface-2); }
+.s-cards__media img { width: 100%; height: 100%; object-fit: cover; }
+.s-cards__icon { width: 3rem; height: 3rem; border-radius: var(--radius); display: grid; place-items: center; background: color-mix(in srgb, var(--c-primary) 12%, transparent); color: var(--c-primary); margin-bottom: 0.75rem; }
+.s-cards__icon .icon { width: 1.5rem; height: 1.5rem; }
+.s-cards__tag { position: absolute; top: 1rem; right: 1rem; background: var(--c-accent); color: var(--c-accent-contrast); }
+.s-cards__meta { font-weight: 700; color: var(--c-primary); }
+.s-cards__link { margin-top: auto; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 650; text-decoration: none; }
+.s-cards__actions { margin-top: 2rem; }
+.band--dark .s-cards__item--plain, .band--primary .s-cards__item--plain { color: inherit; }

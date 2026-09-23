@@ -1,0 +1,8 @@
+/.env
+/.env.*
+!/.env.example
+backend/node_modules/
+backend/.medusa/
+backend/.yarn/
+backend/static/
+backend/uploads/

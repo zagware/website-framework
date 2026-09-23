@@ -1,0 +1,46 @@
+.s-contact__grid { display: grid; gap: 2.5rem; }
+.s-contact__grid > * { min-width: 0; }
+@media (min-width: 900px) {
+  .s-contact__grid--form { grid-template-columns: 5fr 6fr; gap: 4rem; align-items: start; }
+}
+.s-contact__grid--center { text-align: center; justify-items: center; }
+.s-contact__grid--center .s-contact__methods { justify-content: center; }
+.s-contact__info .section-head { margin-bottom: 1.25rem; }
+.s-contact__body { color: var(--c-muted); max-width: 40rem; }
+.band--dark .s-contact__body { color: var(--c-dark-muted); }
+.band--primary .s-contact__body { color: inherit; }
+.s-contact__methods { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.s-contact__method { max-width: 100%; }
+.s-contact__method span { overflow-wrap: anywhere; }
+.band--primary .s-contact__method.btn--primary { background: var(--c-primary-contrast); color: var(--c-primary); }
+
+.s-contact__form { display: grid; gap: 1rem; padding: clamp(1.25rem, 4vw, 2rem); }
+.s-contact__form > * { min-width: 0; }
+.s-contact__form-title { margin: 0; }
+.s-contact__hint { margin: 0; font-size: 0.85rem; color: var(--c-muted); }
+.s-contact__fields { display: grid; gap: 1rem; }
+@media (min-width: 560px) {
+  .s-contact__fields { grid-template-columns: 1fr 1fr; }
+  .s-contact__field--full { grid-column: 1 / -1; }
+}
+.s-contact__field { display: grid; gap: 0.35rem; min-width: 0; }
+.s-contact__field label { font-weight: 650; font-size: 0.95rem; }
+.s-contact__req { color: var(--c-accent); }
+.s-contact__field :is(input, textarea, select) {
+  width: 100%; font: inherit; color: var(--c-text); background: var(--c-bg);
+  border: 1px solid var(--c-border); border-radius: var(--radius); padding: 0.7rem 0.85rem;
+}
+.s-contact__field textarea { resize: vertical; min-height: 8rem; }
+.s-contact__field :is(input, textarea, select):focus-visible { border-color: var(--c-primary); outline-offset: 1px; }
+.s-contact__field :is(input, textarea):user-invalid { border-color: var(--c-accent); }
+.s-contact__hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.s-contact__turnstile { min-height: 65px; }
+.s-contact__submit { justify-self: start; }
+@media (max-width: 400px) {
+  .s-contact__form { padding-inline: 0.9rem; }
+  /* Turnstile's widget is a fixed 300px; shrink it rather than overflow the card. */
+  .s-contact__turnstile { transform: scale(0.9); transform-origin: left top; }
+}
+@media (max-width: 480px) { .s-contact__submit { justify-self: stretch; } }
+.s-contact__sent { display: none; align-items: center; gap: 0.5rem; margin: 0 0 1rem; padding: 0.75rem 1rem; border-radius: var(--radius); background: color-mix(in srgb, var(--c-accent) 14%, transparent); font-weight: 650; }
+.s-contact__sent:target { display: flex; }

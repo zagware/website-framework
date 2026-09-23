@@ -1,0 +1,14 @@
+.s-faq { display: grid; gap: 2rem; max-width: 52rem; }
+.s-faq__group-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
+.s-faq__group-head h3 { margin: 0; }
+.s-faq__group-head .muted { margin-left: auto; font-size: 0.85rem; }
+.s-faq__group-head .icon { color: var(--c-accent); width: 1.4rem; height: 1.4rem; }
+.s-faq__item { border-bottom: 1px solid var(--c-border); }
+.s-faq__item summary { cursor: pointer; list-style: none; padding: 1rem 2.5rem 1rem 0; font-weight: 650; position: relative; }
+.s-faq__item summary::-webkit-details-marker { display: none; }
+.s-faq__item summary::after { content: "+"; position: absolute; right: 0.25rem; top: 0.75rem; font-size: 1.5rem; line-height: 1; color: var(--c-accent); transition: transform 0.2s ease; }
+.s-faq__item[open] summary::after { transform: rotate(45deg); }
+.s-faq__answer { padding: 0 0 1rem; color: var(--c-muted); }
+.band--dark .s-faq__answer { color: var(--c-dark-muted); }
+.band--dark .s-faq__item { border-color: rgb(255 255 255 / 0.15); }
+.s-faq__footnote { margin-top: 2rem; }

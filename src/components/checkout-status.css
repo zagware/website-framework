@@ -1,0 +1,11 @@
+.s-checkout-status { max-width: 40rem; margin-inline: auto; text-align: center; }
+.s-checkout-status__icon {
+  width: 4rem; height: 4rem; margin: 0 auto 1.25rem; border-radius: 999px; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--c-primary) 12%, transparent); color: var(--c-primary);
+}
+.s-checkout-status--cancelled .s-checkout-status__icon { background: var(--c-surface-2); color: var(--c-muted); }
+.s-checkout-status__icon .icon { width: 2rem; height: 2rem; }
+.s-checkout-status h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); }
+.s-checkout-status__body { font-size: 1.1rem; color: var(--c-muted); }
+.band--dark .s-checkout-status__body { color: var(--c-dark-muted); }
+.s-checkout-status__actions { justify-content: center; margin-top: 1.5rem; }

@@ -1,0 +1,71 @@
+# Local Medusa v2 stack: Postgres 16 + Redis 7 + Medusa (server + admin, shared worker mode).
+# Every value has a local default, so `docker compose up -d --build` works without a .env file.
+# Copy .env.example to .env to override (Stripe keys, secrets, ports, CORS).
+name: zag-medusa
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-medusa}
+      POSTGRES_USER: ${POSTGRES_USER:-medusa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-medusa}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  medusa:
+    build:
+      context: ./backend
+      args:
+        MEDUSA_BACKEND_URL: ${MEDUSA_BACKEND_URL:-/}
+    image: zag-medusa-backend:local
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${MEDUSA_PORT:-9000}:9000"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-medusa}:${POSTGRES_PASSWORD:-medusa}@postgres:5432/${POSTGRES_DB:-medusa}
+      REDIS_URL: redis://redis:6379
+      MEDUSA_WORKER_MODE: ${MEDUSA_WORKER_MODE:-shared}
+      # Run `medusa db:migrate` on every boot (fine for one instance; disable when migrations run in CI/deploy).
+      MEDUSA_RUN_MIGRATIONS: ${MEDUSA_RUN_MIGRATIONS:-true}
+      DISABLE_MEDUSA_ADMIN: "false"
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret}
+      COOKIE_SECRET: ${COOKIE_SECRET:-local-dev-cookie-secret}
+      # Plain-HTTP localhost: allow the admin session cookie without the Secure flag.
+      MEDUSA_COOKIE_SECURE: ${MEDUSA_COOKIE_SECURE:-false}
+      STORE_CORS: ${STORE_CORS:-http://localhost:4173,http://127.0.0.1:4173}
+      ADMIN_CORS: ${ADMIN_CORS:-http://localhost:9000,http://127.0.0.1:9000}
+      AUTH_CORS: ${AUTH_CORS:-http://localhost:4173,http://127.0.0.1:4173,http://localhost:9000,http://127.0.0.1:9000}
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    volumes:
+      # Local File Module uploads (admin product images). Production uses the S3 provider (e.g. R2).
+      - medusa_static:/server/static
+
+volumes:
+  postgres_data:
+  redis_data:
+  medusa_static:

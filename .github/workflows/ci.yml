@@ -1,0 +1,32 @@
+# Framework CI: unit tests, devtest build on every target, link check,
+# Worker bundle dry-run, and the new-site scaffold smoke test.
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Build devtest on every target (fails on warnings or broken links)
+        run: node bin/zsite.mjs check sites/devtest
+      - name: Worker bundle dry-run
+        working-directory: sites/devtest
+        run: node ../../bin/zsite.mjs build . --target cloudflare && npx wrangler deploy --dry-run --outdir ../../.wrangler/dry-run
+      - name: Scaffold smoke test
+        run: |
+          node bin/zsite.mjs new "$RUNNER_TEMP/demo" --name "Demo Customer" --commerce
+          node bin/zsite.mjs build "$RUNNER_TEMP/demo" --target pages --strict

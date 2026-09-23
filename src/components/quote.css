@@ -1,0 +1,31 @@
+.s-quote__item { margin: 0; display: flex; flex-direction: column; }
+.s-quote__text { margin: 0 0 1.25rem; flex: 1; }
+.s-quote__text p:last-child { margin-bottom: 0; }
+.s-quote__grid {
+  display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+.s-quote__grid .s-quote__text { font-size: 1rem; }
+.s-quote__grid .s-quote__text::before {
+  content: "\201C"; display: block; height: 0.55em; margin-bottom: 0.4rem;
+  font-family: var(--font-heading); font-size: 3.2rem; line-height: 1; color: var(--c-accent);
+}
+
+.s-quote__item--large { max-width: 50rem; margin-inline: auto; text-align: center; align-items: center; }
+.s-quote__item--large .s-quote__text {
+  font-family: var(--font-heading); font-size: clamp(1.3rem, 3.2vw, 1.9rem); line-height: 1.4;
+}
+.s-quote__item--large .s-quote__text::before {
+  content: "\201C"; display: block; height: 0.6em; margin-bottom: 0.3rem;
+  font-size: 4rem; line-height: 1; color: var(--c-accent);
+}
+
+.s-quote__stars { margin: 0 0 0.75rem; color: var(--c-accent); letter-spacing: 0.12em; font-size: 1.1rem; }
+.s-quote__by { display: flex; align-items: center; gap: 0.8rem; text-align: left; }
+.s-quote__avatar { flex: none; width: 56px; height: 56px; border-radius: 999px; overflow: hidden; background: var(--c-surface-2); }
+.s-quote__item--large .s-quote__avatar { width: 72px; height: 72px; }
+.s-quote__avatar picture { display: contents; }
+.s-quote__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.s-quote__author { display: block; font-style: normal; font-weight: 700; }
+.s-quote__role { display: block; font-size: 0.9rem; color: var(--c-muted); }
+.band--dark .s-quote__item--large .s-quote__role { color: var(--c-dark-muted); }
+.band--primary .s-quote__item--large .s-quote__role { color: inherit; opacity: 0.85; }

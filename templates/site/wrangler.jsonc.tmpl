@@ -1,0 +1,18 @@
+{
+  // Static site on Cloudflare Workers static assets (no Worker script).
+  // Deploy: npm run deploy   (or the "Deploy to Cloudflare" GitHub workflow)
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "{{WORKER_NAME}}",
+  "compatibility_date": "{{COMPAT_DATE}}",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  // Uncomment once the domain's zone is on this Cloudflare account.
+  // "routes": [
+  //   { "pattern": "{{DOMAIN}}", "custom_domain": true },
+  //   { "pattern": "www.{{DOMAIN}}", "custom_domain": true }
+  // ],
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 }
+}
