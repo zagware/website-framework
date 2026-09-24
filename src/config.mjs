@@ -8,6 +8,7 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { normalizeCommerce } from "./commerce.mjs";
 import { slug } from "./html.mjs";
+import { collectCompliance } from "./privacy.mjs";
 import { resolveTheme } from "./themes.mjs";
 
 const TYPES = {
@@ -97,7 +98,7 @@ export function normalizeSite(raw, components) {
     logo: raw.logo ?? null,
     favicon: raw.favicon ?? null,
     themeColor: raw.themeColor ?? theme.tokens?.["--c-primary"] ?? "#1f4e79",
-    theme: { tokens: theme.tokens ?? {}, google: theme.google ?? [] },
+    theme: { tokens: theme.tokens ?? {}, fonts: theme.fonts ?? [] },
     nav: raw.nav ?? [],
     navCta: raw.navCta ?? null,
     socials: raw.socials ?? [],
@@ -121,6 +122,10 @@ export function normalizeSite(raw, components) {
   if (commerce && !seen.has(commerce.cartPath)) {
     warnings.push(`commerce.cartPath "${commerce.cartPath}" has no page; add a page with a "cart" section`);
   }
+  const privacy = collectCompliance(site, components, raw.privacy);
+  site.compliance = privacy.compliance;
+  errors.push(...privacy.errors);
+  warnings.push(...privacy.warnings.map((w) => `privacy: ${w}`));
   return { site, errors, warnings };
 }
 

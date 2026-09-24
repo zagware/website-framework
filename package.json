@@ -20,7 +20,9 @@
     "bin",
     "src",
     "worker",
-    "templates"
+    "templates",
+    "docs",
+    "AGENTS.md"
   ],
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",

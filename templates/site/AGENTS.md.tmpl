@@ -1,0 +1,40 @@
+# AGENTS.md — {{NAME}} website
+
+This repo is a **customer site** built with the Zagware website framework ([{{FRAMEWORK_REPO}}](https://github.com/{{FRAMEWORK_REPO}}), installed as `@zagware/site-framework`). The framework's own `AGENTS.md` in `node_modules/@zagware/site-framework/AGENTS.md` explains the engine. This file covers what you need in *this* repo.
+
+## Where things are
+
+| File | What it holds |
+|---|---|
+| `site.config.mjs` | **All content and settings**: pages → sections, nav, theme, SEO, privacy, and shop products if there is a shop |
+| `assets/` | images (`img/`), documents, video; referenced as `"img/photo.jpg"` |
+| `components/` (optional) | site-only section types, following the framework component contract |
+| `styles/` (optional) | site CSS appended after the framework's |
+| `worker.mjs` (shops/forms only) | re-exports the framework's site Worker; do not add logic here |
+| `wrangler.jsonc` | Cloudflare deploy config (routes, D1, vars). Secrets are never in this file |
+| `.github/workflows/` | `preview-pages.yml` (every push → GitHub Pages preview), `deploy-cloudflare.yml` (tags `v*` → production) |
+
+## Commands
+
+```bash
+npm install
+npx zsite dev .              # http://localhost:4173 with live reload (--port to change)
+npx zsite components         # section types you can use
+npx zsite check .            # build every target; fails on warnings, broken links, undeclared third parties
+```
+
+## Editing rules
+
+- Change content by editing `site.config.mjs`, not generated HTML. `dist/` is build output and is gitignored.
+- Write links root-relative (`/about/`, `/#faq`). The framework makes them work on the preview sub-path and on the real domain.
+- Images go in `assets/img/`. Responsive WebP versions and width/height are generated automatically. Always give `alt` text.
+- Anything loaded from another website (fonts, embeds, widgets, images by URL) fails the build unless it is self-hosted, click-to-load, or declared in `privacy.thirdParties`, which lists it in the privacy notice. Do not add analytics or tracking that needs cookie consent.
+- Before launch the customer must review the generated `/privacy/` page: controller details, retention, and anything extra.
+
+## Deploy
+
+- **Preview**: push to `main` and it publishes to {{PAGES_URL}}.
+- **Production**: see README.md, "Go live on Cloudflare". Then `git tag vX.Y.Z && git push --tags`.
+- **Framework upgrades**: `npm install github:{{FRAMEWORK_REPO}}#vX.Y.Z && npx zsite check .`. Only upgrade to versions already verified on the framework's devtest site.
+
+Never print secrets. Stripe and Cloudflare credentials are set with `wrangler secret put` or as GitHub Actions secrets.

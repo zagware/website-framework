@@ -15,7 +15,7 @@ A page is an ordered list of **sections**. Each section is `{ type, ...props }`,
 | `gallery` | Photo grid with wide tiles, focal points and a lightbox |
 | `videos` | Video players, plus muted clips that play only while visible |
 | `documents` | Downloadable files (PDF press packs, rules) |
-| `location` | Venue text, details, map link or embedded OpenStreetMap |
+| `location` | Venue text, details, map links, and an OpenStreetMap map that loads only on click |
 | `quote` | A testimonial or a grid of them (Review JSON-LD when rated) |
 | `table` | Comparison or data table |
 | `logos` | Sponsor / partner wall |
@@ -24,6 +24,7 @@ A page is an ordered list of **sections**. Each section is `{ type, ...props }`,
 | `contact` | Contact buttons and an optional form. The form works without JavaScript and has a honeypot and optional Turnstile |
 | `rich-text` | Prose |
 | `products` / `cart` / `checkout-status` | Shop (see [COMMERCE.md](COMMERCE.md)) |
+| `privacy-notice` | Privacy notice generated from what the site does (see [PRIVACY.md](PRIVACY.md)) |
 
 ## Common props (every section)
 
@@ -54,6 +55,8 @@ export default {
     people: { type: "array", required: true },
   },
   example: { heading: "Our team", people: [{ name: "Ann", role: "Founder", photo: "img/portrait-1.jpg" }] },
+  // Only if the section makes the browser contact another host (see PRIVACY.md):
+  // thirdParties: (p) => [{ host: "player.vimeo.com", name: "Vimeo", purpose: "Plays the video" }],
   render(p, ctx) {
     return `${ctx.sectionHead(p)}<ul class="grid">${p.people
       .map((x) => `<li class="card">${ctx.image(x.photo, { alt: x.name, sizes: "300px" })}<h3>${esc(x.name)}</h3><p>${esc(x.role)}</p></li>`)
@@ -80,10 +83,12 @@ The engine wraps the output in `<section id class="band band--{tone} s-{type}">`
 | `uid(prefix)` | Unique id within the page |
 | `site`, `page`, `target`, `commerce` | Normalised config |
 
+**External hosts:** the build fails if a section's output loads anything from another host that has not been declared. Self-host the resource, or make it click-to-load with `data-embed` / `data-embed-load` / `data-embed-url` (see `src/client/embed.js`). If neither is possible, declare the host through `thirdParties(props)`; it is then listed in the privacy notice.
+
 Client scripts are plain browser JS. The engine wraps each in an IIFE and bundles only the scripts that pages use. A script must do nothing when its `data-*` hooks are absent.
 
 ### Checklist for a new component
 
 1. Add a realistic `example` that uses the devtest assets. It appears on `/components/` automatically.
-2. Run `node bin/zsite.mjs check sites/devtest`. Any warning or broken link fails.
+2. Run `node bin/zsite.mjs check sites/devtest`. It fails on any warning, broken link or undeclared third-party request.
 3. Check it at 360 px and 1280 px, with the keyboard, and with `prefers-reduced-motion` if it animates.

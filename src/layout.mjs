@@ -60,8 +60,12 @@ ${cart}
 export function renderFooter(site, ctx) {
   const f = site.footer;
   const year = new Date().getUTCFullYear();
-  const links = f.links?.length
-    ? `<ul class="site-footer__links">${each(f.links, (l) => `<li><a href="${esc(ctx.url(l.href))}">${esc(l.label)}</a></li>`)}</ul>`
+  // The privacy notice is always linked from the footer when the site has one.
+  const privacyPath = site.compliance?.privacyPath;
+  const footerLinks = [...(f.links ?? [])];
+  if (privacyPath && !footerLinks.some((l) => l.href === privacyPath)) footerLinks.push({ label: "Privacy", href: privacyPath });
+  const links = footerLinks.length
+    ? `<ul class="site-footer__links">${each(footerLinks, (l) => `<li><a href="${esc(ctx.url(l.href))}">${esc(l.label)}</a></li>`)}</ul>`
     : "";
   const sponsors = f.sponsors?.length
     ? `<div class="site-footer__sponsors"><h2>${esc(f.sponsorsHeading ?? "Supported by")}</h2><ul>${each(

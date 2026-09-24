@@ -30,12 +30,15 @@ node bin/zsite.mjs check sites/devtest    # build all targets; fail on warnings/
 node bin/zsite.mjs new ../acme_website --name "Acme Ltd" [--worker] [--commerce] [--domain acme.ie]
 ```
 
+New here (human or AI agent)? Start with **[AGENTS.md](AGENTS.md)**.
+
 ## Docs
 
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md): how the engine works
 - [COMPONENTS.md](docs/COMPONENTS.md): section types, the component contract, adding components
 - [DEPLOY.md](docs/DEPLOY.md): preview → sale → Cloudflare production, and framework releases
 - [COMMERCE.md](docs/COMMERCE.md): commerce tiers and the stripe-lite design
+- [PRIVACY.md](docs/PRIVACY.md): UK/EU cookie and privacy compliance, the third-party check, and the privacy notice
 - [MEDUSA.md](docs/MEDUSA.md): Medusa evaluation, measurements and hosting costs
 
 ## Release rule

@@ -15,6 +15,12 @@ function osmEmbed(lat, lng, zoom) {
   };
 }
 
+const OSM_HOST = "www.openstreetmap.org";
+const DEFAULT_EMBED_NOTICE = "Loading the map connects to OpenStreetMap, which will see your IP address.";
+
+/** True when props request an embedded map that can actually be rendered. */
+const hasEmbed = (props) => props.embed === "osm" && num(props.lat) !== null && num(props.lng) !== null;
+
 export default {
   type: "location",
   summary: "Venue/location split: photo or map, descriptive text, icon details (address, times, parking) and map links.",
@@ -31,6 +37,7 @@ export default {
     lng: { type: "number" },
     zoom: { type: "number" },
     mapTitle: { type: "string" },
+    embedNotice: { type: "string" },
     reverse: { type: "boolean" },
   },
   example: {
@@ -63,17 +70,23 @@ export default {
     const lng = num(props.lng);
     let map = "";
     let osmLink = "";
-    if (props.embed === "osm" && lat !== null && lng !== null) {
+    if (hasEmbed(props)) {
       const zoom = Math.min(Math.max(Math.round(num(props.zoom) ?? 15), 3), 19);
       const osm = osmEmbed(lat, lng, zoom);
+      const place = props.mapQuery ?? props.heading ?? "the location";
       const title = props.mapTitle ?? `Map showing ${props.heading ?? props.mapQuery ?? "the location"}`;
-      map = `<div class="s-location__map"><iframe${attrs({
-        src: osm.src,
-        title,
-        loading: "lazy",
-        referrerpolicy: "no-referrer-when-downgrade",
-      })}></iframe></div>`;
+      // Click-to-load: nothing is requested from OpenStreetMap until the visitor presses the button.
+      map = `<div class="s-location__map"><div class="s-location__embed" data-embed>${ctx.icon("map-pin")}<p class="s-location__embed-place">${esc(place)}</p><p class="s-location__embed-notice">${esc(
+        props.embedNotice ?? DEFAULT_EMBED_NOTICE,
+      )}</p><div class="s-location__embed-actions"><button${attrs({
+        type: "button",
+        class: "btn btn--primary btn--sm",
+        "data-embed-load": true,
+        "data-embed-url": osm.src,
+        "data-embed-title": title,
+      })}>Show map</button><a href="${esc(osm.link)}" rel="noopener">Open in OpenStreetMap</a></div></div></div>`;
       osmLink = `<a class="btn btn--outline btn--sm" href="${esc(osm.link)}" rel="noopener">${ctx.icon("map-pin")}View larger map</a>`;
+      ctx.useScript("embed");
     }
 
     const media = props.image
@@ -90,5 +103,11 @@ export default {
 
     const aside = media || map ? `<div class="s-location__media">${media}${map}</div>` : "";
     return `<div class="${cls("s-location__grid", !aside && "s-location__grid--single", props.reverse && "s-location__grid--reverse")}">${aside}${text}</div>`;
+  },
+  /** Third-party origins this section can contact (consumed by the privacy notice and third-party check). */
+  thirdParties(props) {
+    return hasEmbed(props)
+      ? [{ host: OSM_HOST, name: "OpenStreetMap", purpose: "Interactive map, loaded only when you press Show map" }]
+      : [];
   },
 };

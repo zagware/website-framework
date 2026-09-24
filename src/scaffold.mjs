@@ -39,6 +39,7 @@ export async function scaffold(dir, { name, commerce = false, worker = false, re
     FRAMEWORK_REPO,
     WORKER_NAME: siteSlug,
     COMPAT_DATE: new Date().toISOString().slice(0, 10),
+    TODAY: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
   };
 
   await mkdir(out, { recursive: true });

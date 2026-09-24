@@ -14,7 +14,8 @@ import { attrs, blocks, esc, inline, jsonScript } from "./html.mjs";
 import { ICONS, sprite } from "./icons.mjs";
 import { renderFooter, renderNav, renderSection } from "./layout.mjs";
 import { headersFile, redirectsFile, resolveTarget, robotsTxt, sitemapXml } from "./targets.mjs";
-import { themeCss } from "./themes.mjs";
+import { scanThirdParties } from "./privacy.mjs";
+import { FONTS, FONTS_DIR, themeCss } from "./themes.mjs";
 
 const SRC = fileURLToPath(new URL("./", import.meta.url));
 const EXTERNAL = /^([a-z][a-z0-9+.-]*:|\/\/|#)/i;
@@ -102,6 +103,23 @@ export function createContext({ site, page, target, manifest, assetFiles, warnin
     uid: (p = "z") => `${p}-${++state.uid}`,
   };
   return { ctx, state };
+}
+
+/** Copy the theme's self-hosted fonts into _z/h/fonts/ and return their @font-face rules. */
+async function fontFaces(out, ids) {
+  const rules = [];
+  for (const id of ids) {
+    const font = FONTS[id];
+    for (const { file, unicodeRange } of font.files) {
+      const name = file.split("/").pop().replace(/\.woff2$/, "");
+      const rel = await writeHashed(out, `fonts/${name}`, "woff2", await readFile(new URL(file, FONTS_DIR)));
+      // url() is relative to the CSS bundle, which also lives in _z/h/.
+      rules.push(
+        `@font-face { font-family: "${font.family}"; font-style: ${font.style}; font-weight: ${font.weight}; font-display: swap; src: url("${rel.slice("_z/h/".length)}") format("woff2"); unicode-range: ${unicodeRange}; }`,
+      );
+    }
+  }
+  return rules.join("\n");
 }
 
 async function readDirCss(dir) {
@@ -224,8 +242,9 @@ export async function build({ siteDir, target: targetName = "local", outDir, ima
     rendered.push({ page, ctx, state, main, nav, footer });
   }
 
-  // Bundles: base → theme tokens → used component CSS → site CSS.
+  // Bundles: self-hosted fonts → base → theme tokens → used component CSS → site CSS.
   const css = [
+    await fontFaces(out, site.theme.fonts),
     await readFile(join(SRC, "styles", "base.css"), "utf8"),
     themeCss(site.theme.tokens),
     ...[...usedTypes].sort().map((t) => components.get(t).css && `/* ${t} */\n${components.get(t).css}`),
@@ -304,6 +323,18 @@ ${beacon}
     if (redirects) await writeFile(join(out, "_redirects"), redirects);
   }
   if (target.name === "pages") await writeFile(join(out, ".nojekyll"), "");
+
+  // Privacy: nothing external may load (or receive form posts) unless declared.
+  const firstParty = [new URL(target.siteUrl).host, site.api.base && new URL(site.api.base).host].filter(Boolean);
+  const violations = await scanThirdParties(out, { firstParty, declared: site.compliance.thirdParties.map((t) => t.host) });
+  if (violations.length) {
+    throw new BuildError(
+      violations.map(
+        (v) => `undeclared third-party request ${v} — self-host it, make it click-to-load, or declare it in privacy.thirdParties (it will be listed in the privacy notice)`,
+      ),
+      [...warnings],
+    );
+  }
 
   const broken = await checkLinks(out, target.basePath);
   return {

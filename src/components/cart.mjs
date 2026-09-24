@@ -28,9 +28,12 @@ export default {
       "data-empty-text": p.emptyText ?? "Your basket is empty.",
       tabindex: "-1",
     });
+    const privacy = ctx.site.compliance?.privacyPath
+      ? `<p class="s-cart__note muted">Payment is handled by Stripe; we never see your card details. See our <a href="${ctx.url(ctx.site.compliance.privacyPath)}">privacy notice</a>.</p>`
+      : "";
     return `${head}<div${root}>
 <noscript><p class="s-cart__fallback">Your basket needs JavaScript. Please enable JavaScript to review your basket and pay securely, or get in touch to order.</p></noscript>
 </div>
-${p.note ? `<p class="s-cart__note muted">${ctx.md(p.note)}</p>` : ""}`;
+${p.note ? `<p class="s-cart__note muted">${ctx.md(p.note)}</p>` : ""}${privacy}`;
   },
 };

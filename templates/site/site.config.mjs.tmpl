@@ -20,6 +20,15 @@ export default {
   footer: { text: "" },
   seo: {},
 
+  // Privacy notice (the "privacy-notice" section on /privacy/ is generated from
+  // what this site actually does). The customer must review it before launch.
+  privacy: {
+    controller: { name: "{{NAME}}", email: "hello@example.com", address: "" },
+    // regulator: "dpc",          // Irish customers ("ico" is the default; en-IE picks "dpc")
+    // thirdParties: [{ host, name, purpose, policyUrl }], // anything external you add
+    updated: "{{TODAY}}",
+  },
+
   pages: [
     {
       path: "/",
@@ -53,5 +62,6 @@ export default {
         },
       ],
     },
+    { path: "/privacy/", title: "Privacy notice", sections: [{ type: "privacy-notice" }] },
   ],
 };

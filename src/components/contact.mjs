@@ -23,6 +23,24 @@ export default {
     form: { type: "object" },
     turnstileSiteKey: { type: "string" },
   },
+  /** External hosts this section contacts (privacy registry + build check). */
+  thirdParties(props) {
+    const out = [];
+    const f = props.form;
+    if (f?.fields?.length && /^https?:\/\//.test(f.action ?? "")) {
+      const host = new URL(f.action).host;
+      out.push({ host, name: f.providerName ?? host, purpose: "Receives contact form submissions", policyUrl: f.providerPolicyUrl });
+    }
+    if (props.turnstileSiteKey && f?.fields?.length) {
+      out.push({
+        host: "challenges.cloudflare.com",
+        name: "Cloudflare Turnstile",
+        purpose: "Checks the contact form is used by a person, not a bot",
+        policyUrl: "https://www.cloudflare.com/turnstile-privacy-policy/",
+      });
+    }
+    return out;
+  },
   example: {
     eyebrow: "Get in touch",
     heading: "Questions? Ask away",
@@ -108,11 +126,16 @@ export default {
       const sent = worker && !f.next
         ? `<p class="s-contact__sent" id="${sentId}" role="status">${ctx.icon("check")}${esc(f.sentMessage ?? "Thanks — your message has been sent.")}</p>`
         : "";
+      const privacyPath = ctx.site.compliance?.privacyPath;
+      const privacyNote = privacyPath
+        ? `<p class="s-contact__privacy muted">${esc(f.privacyText ?? "We only use these details to reply to you.")} See our <a href="${esc(ctx.url(privacyPath))}">privacy notice</a>.</p>`
+        : "";
       form = `<form${attrs({ class: "s-contact__form card", action, method: httpMethod, "accept-charset": "UTF-8" })}>` +
         sent +
         `${f.heading ? `<h3 class="s-contact__form-title">${esc(f.heading)}</h3>` : ""}` +
         `${anyRequired ? `<p class="s-contact__hint" aria-hidden="true">* Required</p>` : ""}` +
         `<div class="s-contact__fields">${each(f.fields, field)}</div>${honeypot}${next}${turnstile}` +
+        privacyNote +
         `<button type="submit" class="btn btn--primary s-contact__submit">${esc(f.submitLabel ?? "Send")}${ctx.icon("arrow-right")}</button></form>`;
     }
 

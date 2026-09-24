@@ -21,6 +21,15 @@ export default {
   footer: { text: "" },
   seo: {},
 
+  // Privacy notice (the "privacy-notice" section on /privacy/ is generated from
+  // what this site actually does). The customer must review it before launch.
+  privacy: {
+    controller: { name: "{{NAME}}", email: "hello@example.com", address: "" },
+    // regulator: "dpc",          // Irish customers ("ico" is the default; en-IE picks "dpc")
+    // thirdParties: [{ host, name, purpose, policyUrl }], // anything external you add
+    updated: "{{TODAY}}",
+  },
+
   // Site Worker. "" = same origin on Cloudflare. GitHub Pages previews cannot
   // run the Worker: point them at the deployed one (Stripe TEST keys) once it exists.
   api: { base: "" },
@@ -101,5 +110,6 @@ export default {
       noindex: true,
       sections: [{ type: "checkout-status", status: "success", heading: "Thank you!", body: "We've emailed your receipt and will let you know when it ships." }],
     },
+    { path: "/privacy/", title: "Privacy notice", sections: [{ type: "privacy-notice" }] },
   ],
 };

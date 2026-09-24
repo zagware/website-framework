@@ -17,6 +17,7 @@ flowchart LR
 - **One source of truth per fact.** Content lives in `site.config.mjs`. Components derive HTML, JSON-LD (FAQPage, Product, Organization), the sitemap and meta tags from the same data. `car_website` copied dates and URLs into up to 7 places; this design avoids that.
 - **Zero runtime dependencies** in `src/`. The only optional dependency is `sharp`, for responsive WebP variants. Without it, images are copied unchanged and the build warns.
 - **Relative URLs everywhere.** `ctx.url("/about/")` is rewritten to a path relative to the current page. The same `dist/` works on `https://org.github.io/repo/` and at a domain root. The 404 page is the only exception: it is served at any depth, so it uses the target's base path.
+- **Nothing to consent to.** There are no cookies, no third-party fonts, and embeds only load on click. The build fails on any undeclared external request, so sites need no cookie banner (see [PRIVACY.md](PRIVACY.md)).
 - **Targets, not branches.** `local`, `pages` and `cloudflare` differ only in site URL, indexing, banner and extra files (see [DEPLOY.md](DEPLOY.md)).
 
 ## Engine (`src/`)
@@ -26,12 +27,13 @@ flowchart LR
 | `config.mjs` | Loads `site.config.mjs`, normalises it and validates it against each component's `props`: unknown types, missing required props, bad paths, duplicate ids, unsafe theme tokens. |
 | `components.mjs` | Auto-discovers `src/components/*.mjs` and `<site>/components/*.mjs`. Site components override framework ones of the same type. |
 | `build.mjs` | Pass 1 renders page bodies and records the components, client scripts, icons and JSON-LD each page uses. The bundles then contain only CSS/JS for components actually used. Pass 2 assembles documents. Also runs the link checker. |
-| `head.mjs` | Title, description, canonical, OG/Twitter tags, robots, favicon (generated from the brand initial if none is given), Google Fonts and the JSON-LD `@graph`. |
+| `head.mjs` | Title, description, canonical, OG/Twitter tags, robots, favicon (generated from the brand initial if none is given), and the JSON-LD `@graph`. |
 | `layout.mjs` | Skip link, preview banner, sticky nav with a CSS-only burger menu (and a basket link for shops), footer with sponsors and credit. |
 | `assets.mjs` | Copies `assets/`. Makes 480/960/1600 px WebP variants with a content-keyed cache in `.zsite-cache/`. Records intrinsic sizes for `width`/`height`, so there is no layout shift. Enforces the 25 MiB limit. |
 | `targets.mjs` | `robots.txt`, `sitemap.xml`, `_headers` (security headers, immutable `/_z/h/*`), `_redirects`. |
 | `dev-server.mjs` | Rebuilds in a child process on any change, so there are no stale ESM caches, and live-reloads over SSE. |
-| `themes.mjs` | Token presets: `classic` (CAR), `heritage` (Ardleevan), `midnight` (zagware.io), `plain`. |
+| `themes.mjs` | Token presets: `classic` (CAR), `heritage` (Ardleevan), `midnight` (zagware.io), `plain`. Fonts are self-hosted from `src/fonts/` and emitted as `@font-face` rules plus hashed woff2 files in `_z/h/fonts/`. |
+| `privacy.mjs` | Third-party registry (site config, component `thirdParties()` and built-in integrations) and a summary of the data the site collects, both used by the `privacy-notice` section. A post-build scan fails on any undeclared external request (see [PRIVACY.md](PRIVACY.md)). |
 
 ## Components
 

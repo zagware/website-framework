@@ -14,6 +14,16 @@
   aspect-ratio: 4 / 3; background: var(--c-surface-2);
 }
 .s-location__map iframe { display: block; width: 100%; height: 100%; border: 0; }
+.s-location__embed {
+  height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.6rem; padding: 1.5rem; text-align: center; color: var(--c-text);
+}
+.s-location__embed > .icon { width: 2rem; height: 2rem; color: var(--c-accent); }
+.s-location__embed p { margin: 0; max-width: 32ch; }
+.s-location__embed-place { font-weight: 600; overflow-wrap: anywhere; }
+.s-location__embed-notice { font-size: 0.88rem; color: var(--c-muted); }
+.s-location__embed-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem; margin-top: 0.4rem; }
+.s-location__embed-actions a { color: var(--c-primary); font-size: 0.92rem; }
 .s-location__text .section-head { margin-bottom: 1.25rem; }
 .s-location__body { color: var(--c-muted); }
 .band--dark .s-location__body { color: var(--c-dark-muted); }

@@ -1,3 +1,8 @@
+import { readFileSync } from "node:fs";
+
+export const FONTS_DIR = new URL("./fonts/", import.meta.url);
+export const FONTS = JSON.parse(readFileSync(new URL("fonts.json", FONTS_DIR), "utf8"));
+
 // Theme presets: token overrides layered on top of base.css defaults.
 // A site picks one with `theme.preset` and may override any token with
 // `theme.tokens`. Presets mirror the existing Zagware customer designs.
@@ -16,7 +21,7 @@ export const PRESETS = {
       "--font-heading": '"Playfair Display", Georgia, serif',
       "--font-body": 'Inter, system-ui, -apple-system, "Segoe UI", sans-serif',
     },
-    google: ["Playfair Display:wght@700;900", "Inter:wght@400;500;600;700"],
+    fonts: ["playfair-display", "inter"],
   },
   // Forest / cream / brass rural brand look (ardleevan_website).
   heritage: {
@@ -37,7 +42,7 @@ export const PRESETS = {
       "--radius": "6px",
       "--radius-lg": "10px",
     },
-    google: ["Bitter:wght@600;700", "Source Sans 3:wght@400;600;700"],
+    fonts: ["bitter", "source-sans-3"],
   },
   // Dark technical look (zagware.io).
   midnight: {
@@ -59,18 +64,21 @@ export const PRESETS = {
       "--font-body": 'Inter, system-ui, sans-serif',
       "--shadow": "0 10px 30px rgb(0 0 0 / 0.35)",
     },
-    google: ["Inter:wght@400;500;600;700;800"],
+    fonts: ["inter"],
   },
   // Neutral system-font preset with no external font requests.
-  plain: { tokens: {}, google: [] },
+  plain: { tokens: {}, fonts: [] },
 };
 
 export function resolveTheme(theme = {}) {
   const preset = PRESETS[theme.preset ?? "plain"];
   if (!preset) return { error: `theme.preset "${theme.preset}" is unknown (have: ${Object.keys(PRESETS).join(", ")})` };
   const tokens = { ...preset.tokens, ...(theme.tokens ?? {}) };
-  const google = theme.fonts?.google ?? preset.google;
-  return { tokens, google };
+  // Fonts are self-hosted from src/fonts (no requests to Google): ids from fonts.json.
+  const fonts = theme.fonts ?? preset.fonts;
+  const unknown = fonts.filter((id) => !FONTS[id]);
+  if (unknown.length) return { error: `theme.fonts: unknown font id(s) ${unknown.join(", ")} (have: ${Object.keys(FONTS).join(", ")})` };
+  return { tokens, fonts };
 }
 
 export function themeCss(tokens) {

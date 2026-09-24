@@ -102,7 +102,7 @@ export async function processAssets({ siteDir, outDir, target, images = true }) 
 export async function writeHashed(outDir, name, ext, content) {
   const hash = createHash("sha256").update(content).digest("hex").slice(0, 10);
   const rel = `_z/h/${name}.${hash}.${ext}`;
-  await mkdir(join(outDir, "_z", "h"), { recursive: true });
+  await mkdir(dirname(join(outDir, rel)), { recursive: true });
   await writeFile(join(outDir, rel), content);
   return rel;
 }

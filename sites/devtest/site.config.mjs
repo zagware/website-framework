@@ -6,11 +6,12 @@
 //   /shop/ …          stripe-lite commerce in Stripe TEST mode
 import { loadComponents } from "../../src/index.mjs";
 
-const COMMERCE_TYPES = new Set(["products", "cart", "checkout-status"]);
+// Shop sections need their own pages; the privacy notice lives on /privacy/.
+const EXCLUDED_FROM_CATALOGUE = new Set(["products", "cart", "checkout-status", "privacy-notice"]);
 const registry = await loadComponents(new URL(".", import.meta.url).pathname);
 const tones = ["default", "alt"];
 const catalogueSections = [...registry.values()]
-  .filter((c) => !COMMERCE_TYPES.has(c.type))
+  .filter((c) => !EXCLUDED_FROM_CATALOGUE.has(c.type))
   .sort((a, b) => a.type.localeCompare(b.type))
   .map((c, i) => ({ ...c.example, type: c.type, id: `c-${c.type}`, tone: c.example?.tone ?? tones[i % 2] }));
 
@@ -56,6 +57,12 @@ export default {
     organization: { email: "hello@zagware.io" },
   },
   redirects: [{ from: "/store/*", to: "/shop/", status: 301 }],
+  // Privacy notice data (rendered by the "privacy-notice" section on /privacy/).
+  privacy: {
+    controller: { name: "Zagware", email: "hello@zagware.io" },
+    regulator: "ico",
+    updated: "24 September 2026",
+  },
   // Site Worker (/api/checkout, /api/contact). "" = same origin on Cloudflare.
   api: { base: "" },
 
@@ -240,6 +247,12 @@ export default {
         },
         ...catalogueSections,
       ],
+    },
+    {
+      path: "/privacy/",
+      title: "Privacy notice",
+      description: "How the Zagware devtest site handles personal information.",
+      sections: [{ type: "privacy-notice", storageRegion: "Western Europe" }],
     },
     {
       path: "/shop/",

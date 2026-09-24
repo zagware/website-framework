@@ -1,11 +1,8 @@
 // <head>: title, description, canonical, Open Graph / Twitter, robots,
-// favicon, fonts, stylesheet, and the JSON-LD @graph (site nodes + nodes
+// favicon, stylesheet, and the JSON-LD @graph (site nodes + nodes
 // that components registered via ctx.addJsonLd).
 
 import { attrs, esc, jsonScript } from "./html.mjs";
-
-const googleFontsHref = (families) =>
-  `https://fonts.googleapis.com/css2?${families.map((f) => `family=${f.trim().replace(/ /g, "+")}`).join("&")}&display=swap`;
 
 export function documentTitle(site, page) {
   return page.path === "/" ? page.title : `${page.title} | ${site.name}`;
@@ -39,7 +36,6 @@ export function renderHead({ site, page, target, ctx, cssHref, faviconHref, json
   const ogImageSrc = page.ogImage ?? site.seo.ogImage;
   const ogImage = ogImageSrc ? ctx.abs(ctx.assetPath(ogImageSrc)) : null;
   const noindex = !target.indexable || page.noindex;
-  const google = site.theme.google;
 
   const meta = (a) => `<meta${attrs(a)}>`;
   return [
@@ -60,9 +56,6 @@ export function renderHead({ site, page, target, ctx, cssHref, faviconHref, json
     meta({ name: "twitter:card", content: ogImage ? "summary_large_image" : "summary" }),
     site.seo.twitter && meta({ name: "twitter:site", content: site.seo.twitter }),
     `<link rel="icon" href="${esc(faviconHref)}">`,
-    google.length && `<link rel="preconnect" href="https://fonts.googleapis.com">`,
-    google.length && `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
-    google.length && `<link rel="stylesheet" href="${esc(googleFontsHref(google))}">`,
     `<link rel="stylesheet" href="${esc(cssHref)}">`,
     jsonLd.length &&
       `<script type="application/ld+json">${jsonScript({ "@context": "https://schema.org", "@graph": jsonLd })}</script>`,
