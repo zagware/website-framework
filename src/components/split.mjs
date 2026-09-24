@@ -13,6 +13,8 @@ export default {
     caption: { type: "string" },
     reverse: { type: "boolean" },
     facts: { type: "array" },
+    factsHeading: { type: "string" },
+    factsText: { type: "string" },
     actions: { type: "array" },
   },
   example: {
@@ -33,19 +35,22 @@ export default {
     const text = `<div class="s-split__text">${ctx.sectionHead(p)}${ctx.blocks(p.paragraphs ?? p.body)}${actionButtons(p.actions, ctx)}</div>`;
     let side = "";
     if (p.facts?.length) {
-      side = `<dl class="s-split__facts card">${p.facts
+      const factsHead = p.factsHeading || p.factsText
+        ? `${p.factsHeading ? `<h3>${ctx.md(p.factsHeading)}</h3>` : ""}${p.factsText ? `<p class="muted">${ctx.md(p.factsText)}</p>` : ""}`
+        : "";
+      side = `<aside class="s-split__aside card">${factsHead}<dl class="s-split__facts">${p.facts
         .map((f) => {
           const value = f.href
             ? `<a href="${esc(ctx.url(f.href))}"${/^https?:/.test(f.href) ? ' rel="noopener"' : ""}>${esc(f.value)}</a>`
             : esc(f.value);
           return `<div><dt>${esc(f.label)}</dt><dd><strong>${value}</strong>${f.sub ? `<span>${esc(f.sub)}</span>` : ""}</dd></div>`;
         })
-        .join("")}</dl>`;
+        .join("")}</dl></aside>`;
     } else if (p.image) {
       side = `<figure class="s-split__figure">${ctx.image(p.image, { alt: p.imageAlt ?? "", sizes: "(max-width: 860px) 100vw, 50vw" })}${
         p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ""
       }</figure>`;
     }
-    return `<div class="s-split${p.reverse ? " s-split--reverse" : ""}${side ? "" : " s-split--solo"}">${text}${side}</div>`;
+    return `<div class="s-split__grid${p.reverse ? " s-split__grid--reverse" : ""}${side ? "" : " s-split__grid--solo"}">${text}${side}</div>`;
   },
 };

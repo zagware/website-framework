@@ -29,3 +29,10 @@
 .s-quote__role { display: block; font-size: 0.9rem; color: var(--c-muted); }
 .band--dark .s-quote__item--large .s-quote__role { color: var(--c-dark-muted); }
 .band--primary .s-quote__item--large .s-quote__role { color: inherit; opacity: 0.85; }
+
+/* background photo variant */
+.s-quote:has(.s-quote__bg) { position: relative; isolation: isolate; overflow: hidden; color: #fff; padding-block: clamp(5rem, 12vw, 9rem); }
+.s-quote__bg { position: absolute; inset: 0; z-index: -1; }
+.s-quote__bg img { width: 100%; height: 100%; object-fit: cover; }
+.s-quote__bg::after { content: ""; position: absolute; inset: 0; background: rgb(0 0 0 / 0.55); }
+.s-quote__over .s-quote__role { color: rgb(255 255 255 / 0.8); }

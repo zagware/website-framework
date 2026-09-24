@@ -72,6 +72,6 @@ export default {
         return `<div class="s-faq__group">${head}${items}</div>`;
       })
       .join("\n");
-    return `${ctx.sectionHead(p)}<div class="s-faq">${body}</div>${p.footnote ? `<p class="s-faq__footnote muted">${ctx.md(p.footnote)}</p>` : ""}`;
+    return `${ctx.sectionHead(p)}<div class="s-faq__groups">${body}</div>${p.footnote ? `<p class="s-faq__footnote muted">${ctx.md(p.footnote)}</p>` : ""}`;
   },
 };

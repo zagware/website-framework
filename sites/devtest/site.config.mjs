@@ -26,6 +26,7 @@ export default {
     pages: "https://zagware.github.io/website-framework/",
   },
   logo: { src: "img/logo.svg", width: 40, height: 40 },
+  topbar: ["Framework staging site", "Test cards only"],
   theme: { preset: "classic" },
   nav: [
     { label: "About", href: "/#about" },
@@ -204,6 +205,13 @@ export default {
             { src: "video/sample.mp4", poster: "video/sample-poster.jpg", title: "Test pattern (again)" },
           ],
           clips: [{ src: "video/sample.mp4" }, { src: "video/sample.mp4" }, { src: "video/sample.mp4" }],
+        },
+        {
+          type: "quote",
+          background: "img/sample-4.jpg",
+          text: "Quote over a background photo: the **background** prop on the quote section.",
+          author: "Devtest",
+          role: "Framework staging",
         },
         { ...registry.get("faq").example, type: "faq", id: "faq" },
         {

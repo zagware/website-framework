@@ -1,6 +1,6 @@
 {
   "name": "@zagware/site-framework",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Zagware static-first website framework: config-driven sites, GitHub Pages previews, Cloudflare production, optional Stripe commerce.",
   "type": "module",
   "private": true,

@@ -27,9 +27,11 @@ function isCurrent(href, page) {
 }
 
 export function renderNav(site, page, ctx) {
+  // logo.wordmark: the logo image already shows the name, so the text is for screen readers only.
+  const name = site.logo?.wordmark ? `<span class="visually-hidden">${esc(site.name)}</span>` : `<span>${esc(site.name)}</span>`;
   const brand = site.logo
-    ? `${ctx.image(site.logo.src, { alt: "", loading: "eager", class: "site-nav__logo", width: site.logo.width, height: site.logo.height })}<span>${esc(site.name)}</span>`
-    : `<span>${esc(site.name)}</span>`;
+    ? `${ctx.image(site.logo.src, { alt: "", loading: "eager", class: "site-nav__logo", width: site.logo.width, height: site.logo.height })}${name}`
+    : name;
   const links = each(
     site.nav,
     (item) =>
@@ -47,7 +49,10 @@ export function renderNav(site, page, ctx) {
 <label class="site-nav__burger" for="nav-toggle" aria-hidden="true">${ctx.icon("menu")}</label>
 <ul class="site-nav__links">${links}${cta}</ul>`
     : "";
-  return `<header class="site-nav">
+  const topbar = site.topbar?.length
+    ? `<div class="topbar"><div class="wrap topbar__inner">${each(site.topbar, (t) => `<span>${ctx.md(t)}</span>`)}</div></div>\n`
+    : "";
+  return `${topbar}<header class="site-nav">
 <nav class="wrap site-nav__inner" aria-label="Main">
 <a class="site-nav__brand" href="${esc(ctx.url("/"))}">${brand}</a>
 ${burger}
@@ -76,7 +81,8 @@ export function renderFooter(site, ctx) {
         },
       )}</ul></div>`
     : "";
-  const brand = site.logo ? ctx.image(site.logo.src, { alt: "", width: site.logo.width, height: site.logo.height }) : "";
+  // A wordmark logo (name baked into the image) rarely suits the dark footer, so the footer shows the name as text.
+  const brand = site.logo && !site.logo.wordmark ? ctx.image(site.logo.src, { alt: "", width: site.logo.width, height: site.logo.height }) : "";
   const credit = f.credit
     ? ` · Built by <a href="https://zagware.io" rel="noopener">zagware.io</a>`
     : "";

@@ -36,7 +36,7 @@ export default {
     };
     const id = ctx.uid("table");
     const label = props.caption ? `aria-labelledby="${id}"` : `aria-label="${esc(props.heading ?? "Data table")}"`;
-    return `${ctx.sectionHead(props)}<div class="s-table__scroll" role="region" tabindex="0" ${label}><table class="s-table__table">` +
+    return `${ctx.sectionHead(props)}<div class="s-table__scroll" role="region" tabindex="0" ${label}><table class="s-table__table" style="--cols:${props.headers.length}">` +
       `${props.caption ? `<caption id="${id}">${ctx.md(props.caption)}</caption>` : ""}` +
       `<thead><tr>${each(props.headers, (h) => `<th scope="col">${ctx.md(String(h ?? ""))}</th>`)}</tr></thead>` +
       `<tbody>${each(props.rows, row)}</tbody></table></div>` +

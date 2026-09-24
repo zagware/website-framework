@@ -99,6 +99,7 @@ export function normalizeSite(raw, components) {
     favicon: raw.favicon ?? null,
     themeColor: raw.themeColor ?? theme.tokens?.["--c-primary"] ?? "#1f4e79",
     theme: { tokens: theme.tokens ?? {}, fonts: theme.fonts ?? [] },
+    topbar: raw.topbar ?? [],
     nav: raw.nav ?? [],
     navCta: raw.navCta ?? null,
     socials: raw.socials ?? [],

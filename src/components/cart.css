@@ -1,4 +1,4 @@
-.s-cart:focus { outline: none; }
+.s-cart__root:focus { outline: none; }
 .s-cart__layout { display: grid; gap: 2rem; align-items: start; }
 @media (min-width: 900px) {
   .s-cart__layout { grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem); }

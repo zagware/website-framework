@@ -4,7 +4,7 @@
   background: var(--c-bg); color: var(--c-text); box-shadow: var(--shadow);
 }
 .s-table__scroll:focus-visible { outline-offset: 3px; }
-.s-table__table { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: 0.97rem; }
+.s-table__table { width: 100%; min-width: max(34rem, calc(var(--cols, 4) * 7.5rem)); border-collapse: collapse; font-size: 0.97rem; }
 .s-table__table caption {
   caption-side: top; text-align: left; padding: 1rem 1.25rem 0.25rem;
   font-weight: 700; color: var(--c-muted);

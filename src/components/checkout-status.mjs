@@ -49,7 +49,7 @@ export default {
           `<a class="btn ${a.style === "outline" || (i > 0 && !a.style) ? "btn--outline" : "btn--primary"}" href="${esc(ctx.url(a.href))}">${esc(a.label)}</a>`,
       )
       .join("");
-    return `<div class="s-checkout-status s-checkout-status--${kind}"${kind === "success" ? " data-cart-clear" : ""}>
+    return `<div class="s-checkout-status__box s-checkout-status--${kind}"${kind === "success" ? " data-cart-clear" : ""}>
 <span class="s-checkout-status__icon">${ctx.icon(d.icon)}</span>
 <h1>${ctx.md(p.heading ?? d.heading)}</h1>
 <div class="s-checkout-status__body">${ctx.blocks(p.body ?? d.body)}</div>

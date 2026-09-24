@@ -1,4 +1,4 @@
-.s-checkout-status { max-width: 40rem; margin-inline: auto; text-align: center; }
+.s-checkout-status__box { max-width: 40rem; margin-inline: auto; text-align: center; }
 .s-checkout-status__icon {
   width: 4rem; height: 4rem; margin: 0 auto 1.25rem; border-radius: 999px; display: grid; place-items: center;
   background: color-mix(in srgb, var(--c-primary) 12%, transparent); color: var(--c-primary);

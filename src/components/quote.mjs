@@ -14,6 +14,7 @@ export default {
     author: { type: "string" },
     role: { type: "string" },
     image: { type: "string" },
+    background: { type: "string" },
     rating: { type: "number" },
     testimonials: { type: "array" },
   },
@@ -55,6 +56,10 @@ export default {
     if (props.testimonials?.length) {
       return `${head}<div class="s-quote__grid">${each(props.testimonials, (q) => figure(q, false))}</div>`;
     }
-    return `${head}${figure(props, true)}`;
+    // background: a decorative full-width photo behind a single large quote (white text on a dark overlay).
+    const bg = props.background
+      ? `<div class="s-quote__bg" aria-hidden="true">${ctx.image(props.background, { alt: "", sizes: "100vw" })}</div>`
+      : "";
+    return `${bg}<div class="${props.background ? "s-quote__over" : ""}">${head}${figure(props, true)}</div>`;
   },
 };

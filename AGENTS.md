@@ -73,8 +73,9 @@ It is a default-exported object. Top-level keys:
 |---|---|
 | `name`, `slug`, `tagline`, `description`, `lang` (`en-GB`/`en-IE`), `locale` | identity and SEO |
 | `urls.production`, `urls.pages`, (`urls.local`) | absolute site URL per target; required for that target |
-| `logo {src,width,height}`, `favicon` | asset paths relative to `assets/` (favicon is generated if omitted) |
-| `theme {preset, tokens, fonts}` | preset + CSS custom property overrides (`--c-primary`, …) + font ids from `src/fonts/fonts.json` |
+| `logo {src,width,height,wordmark}`, `favicon` | asset paths relative to `assets/` (favicon is generated if omitted). `wordmark: true` = the logo image contains the name (the header hides the text, the footer shows text instead of the image) |
+| `topbar ["…", "…"]` | thin announcement strip above the header (inline markup allowed) |
+| `theme {preset, tokens, fonts}` | preset + CSS custom property overrides (`--c-primary`, `--btn-radius`, `--btn-transform`, `--nav-transform`, `--nav-h`, `--logo-h`, …) + font ids from `src/fonts/fonts.json` |
 | `nav [{label, href}]`, `navCta`, `socials [{network, href}]` | header |
 | `footer {text, links, sponsors, owner, smallprint, credit}` | footer (a Privacy link is added automatically) |
 | `seo {ogImage, twitter, organization, headers}` | OG image, Organization JSON-LD extras, extra `_headers` |
@@ -93,7 +94,7 @@ A section is `{ type, ...props }`. Common props on every section: `id`, `tone` (
 - **Component module**: `{ type (== file name), summary, fullBleed, props, example, render(props, ctx), thirdParties?(props) }`.
   - `render` returns the inner HTML; the engine wraps it in `<section class="band … s-<type>">`.
   - Escape everything from config: `esc`/`attrs` from `src/html.mjs`, and `ctx.md`/`ctx.blocks`/`ctx.url`/`ctx.image`.
-  - CSS must be scoped under `.s-<type>` and use only tokens from `src/styles/base.css`.
+  - CSS must be scoped under `.s-<type>` and use only tokens from `src/styles/base.css`. Inner elements use `s-<type>__<part>`, never `s-<type>` itself (that is the section's class; a test enforces this).
   - The full `ctx` API is in `docs/COMPONENTS.md`.
 - **Client scripts**: plain JS, no imports. Select elements via `data-*` hooks. Do nothing when those hooks are absent. Each script is wrapped in its own IIFE.
 - **Relative URLs**: never hard-code `/assets/...` in markup; use `ctx.asset`/`ctx.url`. The 404 page is the only exception: it uses the target base path, and the engine handles that.
@@ -117,7 +118,11 @@ A section is `{ type, ...props }`. Common props on every section: `id`, `tone` (
 - Customer sites live in their own repos, e.g. `~/zagware/<name>_website` → `github.com/zagware/<name>-website`.
 - Each pins the framework by tag: `"@zagware/site-framework": "github:zagware/website-framework#vX.Y.Z"`.
 - A release is a version bump in `package.json` plus `git tag vX.Y.Z`, made after devtest has been checked. Customer repos then upgrade with `npm install github:zagware/website-framework#vX.Y.Z && npx zsite check .`.
-- Existing hand-built sites (`car_website`, `ardleevan_website`, `website`) are **not** on the framework yet. Migrating one means turning its HTML into config sections. The component set was designed from those sites.
+- **Reference migration: `ardleevan_website`** (branch `framework` → preview repo `zagware/ardleevan-website-next`). It keeps the original `content/*.json` and maps it onto sections in `site.config.mjs`. Site-only CSS lives in `styles/site.css`. Copy this pattern when migrating `car_website` or `website`, which are still hand-built:
+  - read the old template section by section;
+  - map each section to a component, and extend a framework component when the gap is generic;
+  - put anything truly one-off in the site's `components/` or `styles/`;
+  - compare both versions in a browser at 1280 px and 375 px.
 
 ## Secrets and safety (strict)
 

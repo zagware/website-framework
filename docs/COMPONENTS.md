@@ -9,14 +9,15 @@ A page is an ordered list of **sections**. Each section is `{ type, ...props }`,
 |---|---|
 | `hero` | Full-bleed header: background image or looping video, headline (`*word*` gets the accent colour), badge, CTAs, aside card (e.g. QR code) |
 | `strip` | Row of icon + short facts (date, place, key points) |
-| `split` | Text beside an image or a key-facts panel; `reverse` swaps the sides |
+| `split` | Text beside an image or a key-facts panel (optional `factsHeading`/`factsText`); `reverse` swaps the sides |
+| `showcase` | Alternating image/text rows (product range, services) with ticks, chips, meta and an expandable details panel of text, key/value tables and data tables; optional schema.org JSON-LD per item |
 | `cards` | Services, features, offers, buying options |
 | `stats` | Big numbers with labels |
 | `gallery` | Photo grid with wide tiles, focal points and a lightbox |
 | `videos` | Video players, plus muted clips that play only while visible |
 | `documents` | Downloadable files (PDF press packs, rules) |
 | `location` | Venue text, details, map links, and an OpenStreetMap map that loads only on click |
-| `quote` | A testimonial or a grid of them (Review JSON-LD when rated) |
+| `quote` | A testimonial or a grid of them (Review JSON-LD when rated); `background` puts a photo behind a single quote |
 | `table` | Comparison or data table |
 | `logos` | Sponsor / partner wall |
 | `faq` | Accordion with FAQPage JSON-LD generated from the same data |
@@ -65,7 +66,7 @@ export default {
 };
 ```
 
-The engine wraps the output in `<section id class="band band--{tone} s-{type}">`. Put CSS under `.s-<type>` and use the tokens from `src/styles/base.css` (`--c-*`, `--font-*`, `--radius`, …). Never hard-code brand colours.
+The engine wraps the output in `<section id class="band band--{tone} s-{type}">`. Put CSS under `.s-<type>` and use the tokens from `src/styles/base.css` (`--c-*`, `--font-*`, `--radius`, `--btn-*`, `--nav-*`, `--logo-h`, …). Never hard-code brand colours. **Never give an inner element the class `s-<type>` itself.** That class belongs to the `<section>`, so a rule like `.s-split { display: grid }` would hit the section. Use `s-<type>__<part>`; a test enforces this.
 
 ### Render context (`ctx`)
 

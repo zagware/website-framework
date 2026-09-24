@@ -169,3 +169,22 @@ describe("builds per target", () => {
     assert.deepEqual(res.broken, ["/about/index.html: ../nowhere/"]);
   });
 });
+
+describe("component contract", async () => {
+  const components = await loadComponents();
+  const commerce = { provider: "stripe-lite", currency: "GBP", products: [{ id: "tee", name: "Tee", price: 1000 }] };
+  const { site } = normalizeSite({ ...BASE, commerce, pages: [{ path: "/", title: "Home" }] }, components);
+  const target = resolveTarget(site, "cloudflare");
+
+  it("no component reuses its section's own class (s-<type>) inside its markup", () => {
+    // The engine puts class "s-<type>" on the <section>; an inner element with the same
+    // class makes section-level CSS (grid, max-width) hit the section itself.
+    for (const [type, comp] of components) {
+      const { ctx } = createContext({ site, page: { path: "/" }, target, manifest: new Map(), assetFiles: null, warnings: new Set() });
+      const html = comp.render({ type, ...(comp.example ?? {}) }, ctx);
+      const clash = [...html.matchAll(/class="([^"]*)"/g)].some((m) => m[1].split(/\s+/).includes(`s-${type}`));
+      assert.equal(clash, false, `${type} renders an element with class "s-${type}"`);
+    }
+  });
+});
+

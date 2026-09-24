@@ -82,7 +82,7 @@ node ~/zagware/website_framework/scripts/with-cf.mjs -- npx wrangler deploy
 
 ## 3. Framework releases → customer sites
 
-- Customer sites pin the framework by git tag: `"@zagware/site-framework": "github:zagware/website-framework#v0.1.0"`.
+- Customer sites pin the framework by git tag: `"@zagware/site-framework": "github:zagware/website-framework#vX.Y.Z"` (see the version in package.json).
 - Release flow:
   1. Change the framework.
   2. CI builds `sites/devtest` on every target (`zsite check`: fails on warnings or broken links), dry-runs the Worker bundle, and smoke-tests the scaffold.

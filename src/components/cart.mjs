@@ -21,7 +21,7 @@ export default {
     ctx.useScript("cart");
     // The client script owns everything inside the root; strings ride on data-*.
     const root = attrs({
-      class: "s-cart",
+      class: "s-cart__root",
       "data-cart-root": true,
       "data-continue-href": ctx.url(p.continueHref ?? "/"),
       "data-continue-label": p.continueLabel ?? "Continue shopping",

@@ -1,4 +1,4 @@
-.s-faq { display: grid; gap: 2rem; max-width: 52rem; }
+.s-faq__groups { display: grid; gap: 2rem; max-width: 52rem; }
 .s-faq__group-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
 .s-faq__group-head h3 { margin: 0; }
 .s-faq__group-head .muted { margin-left: auto; font-size: 0.85rem; }
