@@ -15,13 +15,14 @@ export const actionButtons = (actions, ctx) =>
 
 export default {
   type: "hero",
-  summary: "Full-bleed page header: background image or looping video, headline, badge, calls to action, optional aside card.",
+  summary: "Page header: background image/video behind the text, or (layout: \"split\") the image beside it. Headline, badge, calls to action, optional aside card.",
   fullBleed: true,
   props: {
     title: { type: "string", required: true },
     lede: { type: "string" },
     badge: { type: "string" },
     actions: { type: "array" },
+    layout: { type: "string" },
     image: { type: "string" },
     imageAlt: { type: "string" },
     video: { type: "object" },
@@ -44,10 +45,11 @@ export default {
   },
   render(p, ctx) {
     const height = HEIGHTS.has(p.height) ? p.height : "large";
-    const overlay = Math.min(Math.max(p.overlay ?? (p.image || p.video ? 0.55 : 0), 0), 0.9);
-    const media = p.image || p.video;
+    const split = p.layout === "split" && p.image;
+    const overlay = split ? 0 : Math.min(Math.max(p.overlay ?? (p.image || p.video ? 0.55 : 0), 0), 0.9);
+    const media = !split && (p.image || p.video);
     const bg = [
-      p.image &&
+      !split && p.image &&
         ctx.image(p.image, { alt: p.imageAlt ?? "", class: "hero__img", loading: "eager", fetchpriority: "high", sizes: "100vw" }),
       p.video &&
         `<video class="hero__video"${attrs({
@@ -68,7 +70,15 @@ export default {
           sizes: "160px",
         })}${p.aside.href ? "</a>" : ""}${p.aside.caption ? `<figcaption>${esc(p.aside.caption)}</figcaption>` : ""}</figure>`
       : "";
-    return `<div class="hero hero--${height}${media ? " hero--media" : ""}${p.align === "center" ? " hero--center" : ""}" style="--overlay:${overlay}">
+    const figure = split
+      ? `<div class="hero__figure">${ctx.image(p.image, {
+          alt: p.imageAlt ?? "",
+          loading: "eager",
+          fetchpriority: "high",
+          sizes: "(max-width: 900px) 100vw, 46vw",
+        })}</div>`
+      : "";
+    return `<div class="hero hero--${height}${media ? " hero--media" : ""}${split ? " hero--split" : ""}${p.align === "center" ? " hero--center" : ""}" style="--overlay:${overlay}">
 ${media ? `<div class="hero__bg">${bg}</div>` : ""}
 <div class="wrap hero__inner">
 <div class="hero__content">
@@ -78,6 +88,7 @@ ${p.badge ? `<p class="hero__badge">${ctx.icon("calendar")}${esc(p.badge)}</p>` 
 ${p.lede ? `<p class="hero__lede">${ctx.md(p.lede)}</p>` : ""}
 ${actionButtons(p.actions, ctx)}
 </div>
+${figure}
 ${aside}
 </div>
 </div>`;

@@ -22,8 +22,13 @@
 .hero__aside { margin: 0; background: #fff; color: var(--c-text); padding: 0.75rem; border-radius: var(--radius-lg); box-shadow: var(--shadow); width: 170px; flex: none; text-align: center; font-size: 0.85rem; font-weight: 600; }
 .hero__aside img { width: 100%; height: auto; border-radius: var(--radius); aspect-ratio: 1; object-fit: cover; }
 .hero__aside figcaption { margin-top: 0.5rem; }
+.hero--split .hero__inner { align-items: center; gap: clamp(2rem, 5vw, 4rem); }
+.hero--split .hero__content { flex: 1 1 26rem; max-width: 36rem; }
+.hero--split .hero__figure { flex: 1 1 22rem; max-width: 46%; }
+.hero--split .hero__figure img { width: 100%; height: auto; border-radius: var(--radius-lg); }
 @media (max-width: 760px) {
   .hero__inner { flex-direction: column; align-items: flex-start; }
   .hero__aside { display: none; }
+  .hero--split .hero__figure { max-width: 100%; width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .hero__video { display: none; } }
