@@ -23,6 +23,7 @@ A page is an ordered list of **sections**. Each section is `{ type, ...props }`,
 | `faq` | Accordion with FAQPage JSON-LD generated from the same data |
 | `cta` | Call-to-action band |
 | `contact` | Contact buttons and an optional form. The form works without JavaScript and has a honeypot and optional Turnstile |
+| `code` | Code, command or config snippets with an optional filename, language label and copy button. One `code`/`language`/`filename`, or several in `blocks` |
 | `rich-text` | Prose |
 | `products` / `cart` / `checkout-status` | Shop (see [COMMERCE.md](COMMERCE.md)) |
 | `privacy-notice` | Privacy notice generated from what the site does (see [PRIVACY.md](PRIVACY.md)) |

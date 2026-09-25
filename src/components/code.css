@@ -1,0 +1,36 @@
+.s-code__list { display: grid; gap: 1rem; }
+.s-code__block {
+  margin: 0; border: 1px solid var(--c-border); border-radius: var(--radius-lg);
+  background: var(--c-surface); overflow: hidden;
+}
+.s-code__head {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface-2);
+}
+.s-code__label {
+  font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--c-muted); min-height: 1rem;
+}
+.s-code__label[data-filename] { text-transform: none; letter-spacing: 0; font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+.s-code__copy {
+  border: 1px solid var(--c-border); border-radius: var(--radius); background: transparent;
+  color: var(--c-muted); font: inherit; font-size: 0.8rem; padding: 0.15rem 0.6rem; cursor: pointer;
+}
+.s-code__copy:hover, .s-code__copy:focus-visible { color: var(--c-text); border-color: var(--c-primary); }
+.s-code__copy[data-copied] { color: var(--c-accent); border-color: var(--c-accent); }
+.s-code__pre {
+  margin: 0; padding: 1rem 1.1rem; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.88rem; line-height: 1.6; tab-size: 2;
+}
+.s-code__pre code { color: var(--c-text); white-space: pre; background: none; padding: 0; border-radius: 0; font-size: inherit; }
+.band--dark .s-code__block { border-color: color-mix(in srgb, var(--c-dark-text) 18%, transparent); background: color-mix(in srgb, var(--c-dark) 65%, #000); }
+.band--dark .s-code__head { background: color-mix(in srgb, var(--c-dark) 40%, #000); border-bottom-color: color-mix(in srgb, var(--c-dark-text) 14%, transparent); }
+.band--dark .s-code__pre code { color: var(--c-dark-text); }
+.band--dark .s-code__label, .band--dark .s-code__note { color: var(--c-dark-muted); }
+.band--dark .s-code__copy { color: var(--c-dark-muted); border-color: color-mix(in srgb, var(--c-dark-text) 22%, transparent); }
+
+@media (max-width: 600px) {
+  .s-code__pre { padding: 0.8rem 0.85rem; font-size: 0.82rem; }
+}
