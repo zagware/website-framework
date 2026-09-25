@@ -98,6 +98,35 @@ export async function processAssets({ siteDir, outDir, target, images = true }) 
   return { manifest, files, warnings, errors };
 }
 
+/**
+ * Copy <site>/static verbatim into the site root. For files that must keep an exact URL --
+ * legacy pages, PDFs, .well-known -- and are not part of the image pipeline. Nothing is
+ * renamed, hashed or transformed, so these URLs survive a redesign.
+ * @returns {{ files: Set<string>, warnings: string[], errors: string[] }}
+ */
+export async function copyStatic({ siteDir, outDir, target }) {
+  const src = join(siteDir, "static");
+  const files = new Set();
+  const warnings = [];
+  const errors = [];
+  if (!existsSync(src)) return { files, warnings, errors };
+
+  for (const file of await walk(src)) {
+    const rel = posix(relative(src, file));
+    const info = await stat(file);
+    if (info.size > MAX_ASSET_BYTES) {
+      const msg = `static/${rel} is ${(info.size / 1048576).toFixed(1)} MiB; Cloudflare static assets cap files at 25 MiB (host large media on R2/Stream)`;
+      (target === "cloudflare" ? errors : warnings).push(msg);
+    }
+    if (/\s/.test(rel)) warnings.push(`static/${rel}: file names with spaces make fragile URLs; rename it`);
+    const dest = join(outDir, rel);
+    await mkdir(dirname(dest), { recursive: true });
+    await copyFile(file, dest);
+    files.add(rel);
+  }
+  return { files, warnings, errors };
+}
+
 /** Write a content-hashed file under dist/_z/h/ and return its dist-relative path. */
 export async function writeHashed(outDir, name, ext, content) {
   const hash = createHash("sha256").update(content).digest("hex").slice(0, 10);

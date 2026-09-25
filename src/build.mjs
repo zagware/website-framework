@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { processAssets, writeHashed } from "./assets.mjs";
+import { copyStatic, processAssets, writeHashed } from "./assets.mjs";
 import { catalog, clientConfig } from "./commerce.mjs";
 import { loadComponents } from "./components.mjs";
 import { loadSiteConfig, normalizeSite, pageDepth, pageFile } from "./config.mjs";
@@ -218,6 +218,10 @@ export async function build({ siteDir, target: targetName = "local", outDir, ima
   const assets = await processAssets({ siteDir: dir, outDir: out, target: target.name, images });
   assets.warnings.forEach((w) => warnings.add(w));
   if (assets.errors.length) throw new BuildError(assets.errors, [...warnings]);
+
+  const staticFiles = await copyStatic({ siteDir: dir, outDir: out, target: target.name });
+  staticFiles.warnings.forEach((w) => warnings.add(w));
+  if (staticFiles.errors.length) throw new BuildError(staticFiles.errors, [...warnings]);
 
   const pages = [...site.pages];
   if (!pages.some((p) => p.notFound)) pages.push(notFoundPage(site));

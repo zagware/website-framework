@@ -168,6 +168,21 @@ describe("builds per target", () => {
     const res = await build({ siteDir: dir, target: "pages", outDir: join(dir, "dist") });
     assert.deepEqual(res.broken, ["/about/index.html: ../nowhere/"]);
   });
+
+  it("copies static/ verbatim to the site root, so legacy URLs survive and links to them resolve", async () => {
+    const config = structuredClone(BASE);
+    config.pages[1].sections[0].body = "See the [sample report](/examples/report.html) and the [patent](/patents/US-1.pdf).";
+    const dir = await writeSite("static-site", config, {
+      "static/examples/report.html": "<!doctype html><title>Report</title>",
+      "static/patents/US-1.pdf": "%PDF-1.4",
+    });
+    const out = join(dir, "dist");
+    const res = await build({ siteDir: dir, target: "cloudflare", outDir: out });
+    assert.deepEqual(res.broken, []);
+    assert.equal(await readFile(join(out, "examples/report.html"), "utf8"), "<!doctype html><title>Report</title>");
+    assert.ok(existsSync(join(out, "patents/US-1.pdf")));
+    assert.ok(!existsSync(join(out, "assets/examples/report.html")));
+  });
 });
 
 describe("component contract", async () => {

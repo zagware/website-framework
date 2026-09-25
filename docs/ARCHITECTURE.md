@@ -29,7 +29,7 @@ flowchart LR
 | `build.mjs` | Pass 1 renders page bodies and records the components, client scripts, icons and JSON-LD each page uses. The bundles then contain only CSS/JS for components actually used. Pass 2 assembles documents. Also runs the link checker. |
 | `head.mjs` | Title, description, canonical, OG/Twitter tags, robots, favicon (generated from the brand initial if none is given), and the JSON-LD `@graph`. |
 | `layout.mjs` | Skip link, preview banner, sticky nav with a CSS-only burger menu (and a basket link for shops), footer with sponsors and credit. |
-| `assets.mjs` | Copies `assets/`. Makes 480/960/1600 px WebP variants with a content-keyed cache in `.zsite-cache/`. Records intrinsic sizes for `width`/`height`, so there is no layout shift. Enforces the 25 MiB limit. |
+| `assets.mjs` | Copies `assets/`. Makes 480/960/1600 px WebP variants with a content-keyed cache in `.zsite-cache/`. Records intrinsic sizes for `width`/`height`, so there is no layout shift. Enforces the 25 MiB limit. Also copies `static/` verbatim into the site root (`static/patents/x.pdf` → `/patents/x.pdf`) for files that must keep an exact URL: legacy pages, PDFs, `.well-known`. Nothing there is renamed, hashed or transformed, and internal links to it are link-checked like any other page. |
 | `targets.mjs` | `robots.txt`, `sitemap.xml`, `_headers` (security headers, immutable `/_z/h/*`), `_redirects`. |
 | `dev-server.mjs` | Rebuilds in a child process on any change, so there are no stale ESM caches, and live-reloads over SSE. |
 | `themes.mjs` | Token presets: `classic` (CAR), `heritage` (Ardleevan), `midnight` (zagware.io), `plain`. Fonts are self-hosted from `src/fonts/` and emitted as `@font-face` rules plus hashed woff2 files in `_z/h/fonts/`. |
