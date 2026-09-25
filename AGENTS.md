@@ -124,10 +124,88 @@ A section is `{ type, ...props }`. Common props on every section: `id`, `tone` (
   - put anything truly one-off in the site's `components/` or `styles/`;
   - compare both versions in a browser at 1280 px and 375 px.
 
+
+## Hosting: Pages vs Workers — read before touching any live domain
+
+Two Cloudflare products host Zagware sites, and they behave differently in ways that have already
+caused an outage. Full runbook: `docs/DEPLOY.md`.
+
+| | **Cloudflare Pages** (legacy) | **Workers static assets** (the standard) |
+|---|---|---|
+| Trigger | The **Cloudflare GitHub App** watches the repo and deploys **every push to `main`**, automatically | `wrangler deploy` from CI on a `v*` tag, or `npm run deploy` |
+| Build config | In the Cloudflare dashboard, **not in the repo** | `wrangler.jsonc` in the repo |
+| Control | None — merging to `main` publishes | Tag-gated, reviewable, rollback by redeploying an older tag |
+| DNS for a custom domain | Pages creates and **owns** the record | Workers creates and owns the record |
+
+**The org norm is that any repo connected to a Pages project publishes on merge to `main`.** Treat
+`main` as production for those repos. New sites use Workers, so production is a deliberate tag.
+
+### The four rules
+
+1. **Check for a Pages project before you restructure a site repo.** `GET /accounts/{acct}/pages/projects`.
+   A Pages project with an empty `build_command` publishes the repo root verbatim. Deleting the
+   hand-written HTML from such a repo publishes a broken site the moment you push — this happened to
+   `zagware.io`. Either set the build command first (`npm ci && npx zsite build . --target cloudflare --strict`,
+   output `dist`) or disconnect the project before pushing.
+2. **Never detach a Pages custom domain expecting to re-point it.** Detaching leaves the DNS record
+   behind with nothing serving it: the hostname starts returning **522 within seconds**. Re-attaching
+   to Pages restores it.
+3. **Workers refuses a custom domain over a record it does not own**:
+   `409 code 100117 — Hostname already has externally managed DNS records`. The leftover Pages record
+   is exactly such a record, so the migration is blocked unless you can delete it, which needs
+   **`Zone:DNS:Edit`**.
+4. **Verify through the cache.** Cloudflare served stale 200s for a site that was already broken.
+   Always cache-bust (`curl "https://host/?cb=$RANDOM"`) and check more than `/`.
+
+### Which product is actually answering a request
+
+Pages sends `access-control-allow-origin: *` on HTML; Workers static assets does not. That header is
+the reliable tell when a hostname is attached to both.
+
+### Migrating a site from Pages to Workers
+
+Ordered so the site is only exposed between steps 3 and 5 (seconds):
+
+1. Point the Pages build config at the framework build, so `main` keeps publishing something valid.
+2. `wrangler deploy` with **no** routes. Verify on `https://<worker>.<subdomain>.workers.dev`.
+3. Detach the hostname from the Pages project.
+4. **Delete the leftover DNS record** (needs `Zone:DNS:Edit`).
+5. Add `{ "pattern": "host.example.com", "custom_domain": true }` to `wrangler.jsonc` and deploy.
+   Workers recreates the DNS record itself.
+6. Re-verify every page, the redirects, `robots.txt`, `sitemap.xml` and the 404, cache-busted.
+
+**Without `Zone:DNS:Edit`**, use a **zone route** instead, which needs no DNS change and has no
+downtime: `"routes": [{ "pattern": "host.example.com/*", "zone_name": "example.com" }]`. Routes take
+precedence over Pages, so the Worker answers while the record still belongs to Pages. This is a
+holding position, not the destination — record why in `wrangler.jsonc` and finish the migration when
+the permission is available.
+
+### Site registry
+
+One place to see what is hosted how. Update this table whenever a site moves.
+
+| Site | Repo | Hosting | Delivery | State |
+|---|---|---|---|---|
+| `devtest.zagware.io` | this repo, `sites/devtest` | Workers | auto from `main` | staging for every framework change |
+| `www.zagware.io` | `zagware/website` | Worker `zagware-website` **via zone route** | tag `v*` → `wrangler deploy` | Pages project `website` still attached and auto-deploying as a standby; finish per the runbook when `Zone:DNS:Edit` exists. Apex 301 → www |
+| `ardleevandogfood.co.uk` | `zagware/ardleevan-website` (branch `framework`, PR #1) | Workers (planned) | tag `v*` | not live; DNS still at Big Wet Fish pending the nameserver change |
+| `carlingfordadventurerace.com` | — | Worker | — | pre-framework |
+| `planner.zagware.io`, `staging.planner.zagware.io` | — | Workers | — | app, not a framework site |
+
+### Controlled delivery, across all sites
+
+- The framework is the single control point: sites pin `github:zagware/website-framework#vX.Y.Z`, so
+  nothing changes under a customer until their repo bumps the tag.
+- Production for a framework site is a **tag**, never a merge. If a site still has a Pages project
+  auto-deploying `main`, that is a second, ungated path to production — either keep it building the
+  same output as a deliberate standby (as `zagware.io` does today) or disconnect it.
+- Roll out a framework release one site at a time: `npm install …#vX.Y.Z`, `npx zsite check .`, open a
+  PR, look at the preview, then tag.
+
 ## Secrets and safety (strict)
 
 - **Never print or `cat` secret files**: `~/zagware/.env`, any `.dev.vars`, `.env*`. Some lines have no `KEY=` prefix, so even "key names only" filters can leak values. To inspect one, print value *shapes* only (length/prefix) with `awk`, or load values straight into a child process.
-- **Cloudflare**: `node scripts/with-cf.mjs --env-file ~/zagware/cloudflare_poc_app/.dev.vars -- npx wrangler …`. The token has deployed Workers, created D1 databases and attached custom domains on `zagware.io`. Zones on the account: `zagware.io` and `carlingfordadventurerace.com`. It has **no** Email Routing permission.
+- **Cloudflare**: `node scripts/with-cf.mjs --env-file ~/zagware/cloudflare_poc_app/.dev.vars -- npx wrangler …`. The token has deployed Workers, created D1 databases, managed Pages projects and their custom domains, and created zone routes on `zagware.io`. Zones on the account: `zagware.io` and `carlingfordadventurerace.com`. It has **no** `Zone:DNS:Edit`, **no** Rulesets access (so redirect rules are dashboard-only) and **no** Email Routing permission. Anything that must create or delete a DNS record — including a Workers **custom domain** over an existing record — fails with this token.
 - **Stripe (test)**: the key is in `~/zagware/.env`. Pipe it into `wrangler secret put` through stdin, never through argv or output. Worker secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and optionally `TURNSTILE_SECRET`.
 - **Email Routing: never enable it on `zagware.io` itself** (mail is on Proton). Use subdomains only; see docs/DEPLOY.md.
 - **GitHub**: `gh` is authenticated as davymcaleer (org `zagware`). The repo has Actions secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and the variable `DEVTEST_CLOUDFLARE=true`.
@@ -135,8 +213,11 @@ A section is `{ type, ...props }`. Common props on every section: `id`, `tone` (
 ## Gotchas
 
 - `node --test` needs the glob form (`"test/*.test.mjs"`); a bare directory argument fails on newer Node.
-- `wrangler` custom domains are defined in `wrangler.jsonc` `routes` with `custom_domain: true`.
+- `wrangler` custom domains are `routes` entries with `custom_domain: true`; a plain `{ pattern: "host/*", zone_name }` is a zone route instead, which does not touch DNS and overrides a Pages project on the same hostname.
 - GitHub-hosted runners get Cloudflare bot challenges (403 with `cf-mitigated: challenge`). `zsite smoke` reports those instead of failing on them.
 - Workers static assets serve `_headers`/`_redirects`; GitHub Pages ignores them, and ignores `CNAME` files for Actions-based deploys.
 - Hashed bundles and fonts live in `_z/h/` (cached as immutable). `/_z/catalog.json` is not hashed, on purpose.
 - The dev server rebuilds in a child process, so edits to config, imported JSON, components and the engine all take effect without restarting.
+- Workers static assets `html_handling: "auto-trailing-slash"` (the scaffold default) redirects `/x.html` → `/x` with a 307/308. Legacy `.html` URLs kept in `static/` therefore resolve via one hop, not directly. Keep the `.html` form in config links so the link checker can see the file on disk.
+- `static/` is copied verbatim to the site root and is link-checked, but it is **not** privacy-scanned any differently: any `.html` in there must also avoid undeclared external hosts.
+- Cloudflare Pages build settings live in the dashboard/API, not the repo. `GET/PATCH /accounts/{acct}/pages/projects/{name}` reads and writes `build_config`; `POST …/deployments` with a `branch` form field triggers a build.

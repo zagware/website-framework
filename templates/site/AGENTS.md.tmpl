@@ -36,5 +36,6 @@ npx zsite check .            # build every target; fails on warnings, broken lin
 - **Preview**: push to `main` and it publishes to {{PAGES_URL}}.
 - **Production**: see README.md, "Go live on Cloudflare". Then `git tag vX.Y.Z && git push --tags`.
 - **Framework upgrades**: `npm install github:{{FRAMEWORK_REPO}}#vX.Y.Z && npx zsite check .`. Only upgrade to versions already verified on the framework's devtest site.
+- **Production is a tag, never a merge.** If this site also has a Cloudflare **Pages** project connected to the repo, the Cloudflare GitHub App publishes every push to `main` as well — check before restructuring the repo, and never detach a Pages custom domain without reading `docs/DEPLOY.md` §2b in the framework: it takes the hostname down.
 
 Never print secrets. Stripe and Cloudflare credentials are set with `wrangler secret put` or as GitHub Actions secrets.

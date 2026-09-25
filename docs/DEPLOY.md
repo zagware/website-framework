@@ -39,9 +39,9 @@ The **Preview (GitHub Pages)** workflow publishes on every push to `main`. Send 
    - If the customer already owns it, add the zone to our Cloudflare account (dashboard → Add a domain) and have them change nameservers at their registrar.
    - To register it for them, use Cloudflare Registrar (at-cost pricing).
    - Before the nameserver switch, copy their mail records (MX, SPF, DKIM, DMARC). Cloudflare's import scan usually finds them. Check against `dig` output, as `ardleevan_website/DNS-CUTOVER.md` does.
-2. **wrangler.jsonc**: uncomment `routes` with `custom_domain: true` for apex and `www`. Cloudflare creates the DNS records and certificates automatically.
+2. **wrangler.jsonc**: uncomment `routes` with `custom_domain: true` for apex and `www`. Cloudflare creates the DNS records and certificates automatically — but only if no other product already owns a record for that hostname. If the site is currently on Cloudflare Pages, follow [2b](#2b-cloudflare-pages-vs-workers-and-migrating-between-them) instead of this step.
 3. **Secrets in the site repo** (Settings → Secrets → Actions):
-   - `CLOUDFLARE_API_TOKEN`: a token scoped to *Workers Scripts:Edit*, *Workers Routes:Edit*, *D1:Edit*, and *Zone:Read* on that zone.
+   - `CLOUDFLARE_API_TOKEN`: a token scoped to *Workers Scripts:Edit*, *Workers Routes:Edit*, *D1:Edit*, and *Zone:Read* on that zone — plus *Zone:DNS:Edit* if the deploy has to create a `custom_domain` record.
    - `CLOUDFLARE_ACCOUNT_ID`
 4. **Sites with a Worker (contact form and/or shop)**:
    - `npx wrangler d1 create <slug>-site`, paste the id into `wrangler.jsonc`, then `npx wrangler d1 migrations apply DB --remote`.
@@ -51,6 +51,72 @@ The **Preview (GitHub Pages)** workflow publishes on every push to `main`. Send 
 6. **Deploy**: tag `v1.0.0` (or run the **Deploy (Cloudflare)** workflow by hand). The workflow builds with `--strict`, applies D1 migrations, deploys, and runs `zsite smoke` (`/`, `/robots.txt`, the 404 page, `/api/health`). A Cloudflare bot challenge seen from the GitHub runner (Bot Fight Mode) is reported, not failed; every other error fails the deploy.
 7. **www → apex (or the reverse)**: dashboard → Rules → Redirect Rules → "Redirect from WWW to root" template.
 8. **Pages preview**: turn off the Pages site (Settings → Pages → Unpublish), or keep it for staging changes. It stays `noindex` either way.
+
+## 2b. Cloudflare Pages vs Workers, and migrating between them
+
+Older Zagware sites are **Cloudflare Pages** projects connected to their GitHub repo through the
+**Cloudflare GitHub App**. That app watches the repo and deploys **every push to `main`** with no tag
+and no approval. Framework sites use **Workers static assets** instead, deployed by `wrangler` on a
+`v*` tag. Before changing anything about a site repo, find out which it is:
+
+```bash
+node scripts/with-cf.mjs -- node -e '
+const a=process.env.CLOUDFLARE_ACCOUNT_ID,h={Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`};
+fetch(`https://api.cloudflare.com/client/v4/accounts/${a}/pages/projects`,{headers:h}).then(r=>r.json())
+  .then(j=>console.log(j.result.map(p=>({name:p.name,domains:p.domains,build:p.build_config.build_command}))));'
+```
+
+### Why this bites
+
+- A Pages project with an **empty build command** publishes the repo root verbatim. Migrating such a
+  repo to the framework deletes the hand-written HTML, so the very next push publishes a site with no
+  `index.html`. Set the build command *before* pushing the migration:
+  `npm ci && npx zsite build . --target cloudflare --strict`, output directory `dist`.
+- **Detaching a Pages custom domain orphans its DNS record.** The record survives, pointing at nothing,
+  and the hostname returns **522 within seconds**. Re-attaching the domain to the Pages project is the
+  fastest rollback.
+- **A Workers custom domain will not bind over a record it does not own**:
+  `409 code 100117 — Hostname 'x' already has externally managed DNS records`. The orphaned Pages
+  record is one of those, so you cannot simply hand the hostname over.
+- Cloudflare will serve **stale cached 200s** from a site that is already broken. Cache-bust every
+  check (`?cb=$RANDOM`) and test several paths, not just `/`.
+- Telling them apart at runtime: Pages sends `access-control-allow-origin: *` on HTML responses;
+  Workers static assets does not.
+
+### Migration order (exposure limited to steps 3–5)
+
+1. Point the Pages build config at the framework build, so `main` keeps publishing a valid site.
+2. `wrangler deploy` with no `routes`. Verify everything on `https://<worker>.<subdomain>.workers.dev`.
+3. Detach the hostname from the Pages project.
+4. Delete the leftover DNS record — **needs `Zone:DNS:Edit`**.
+5. Add `{ "pattern": "host.example.com", "custom_domain": true }` to `wrangler.jsonc` and deploy;
+   Workers recreates the record and issues the certificate.
+6. Re-verify cache-busted: every page, the `_redirects` entries, `robots.txt`, `sitemap.xml`, the 404,
+   and anything in `static/`.
+7. Delete the Pages project, or leave it building the same output as a standby — but never leave it
+   as a second ungated path publishing *different* content.
+
+### If you do not have `Zone:DNS:Edit`
+
+Use a **zone route**, which changes no DNS and has no downtime:
+
+```jsonc
+"routes": [{ "pattern": "host.example.com/*", "zone_name": "example.com" }]
+```
+
+Routes take precedence over Pages on the same hostname, so the Worker answers while the DNS record
+still belongs to Pages. This is how `www.zagware.io` runs today. It is a holding position: record the
+reason in `wrangler.jsonc` and finish steps 3–5 once the permission exists.
+
+### Token scopes
+
+| Task | Scope |
+|---|---|
+| Deploy a Worker, upload assets | Account · Workers Scripts:Edit |
+| Zone route | Zone · Workers Routes:Edit |
+| Workers **custom domain** | Workers Routes:Edit **+ Zone:DNS:Edit** (it writes the record) |
+| Read/patch a Pages project, trigger a build | Account · Cloudflare Pages:Edit |
+| Redirect rules (apex → www) | Zone · Config Rules / Rulesets — dashboard only with the current token |
 
 ### Contact form email
 
